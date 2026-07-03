@@ -100,7 +100,7 @@ export default function Player() {
           background: "#1a1a1a", border: "1px solid #2a2a2a", color: "#555", cursor: "pointer",
         }}>← 首頁</button>
         <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 3, color: "#f0f0f0" }}>球員版</span>
-        <button style={{
+        <button onClick={() => navigate("/auth")} style={{
           padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
           background: "#cc000022", border: "1px solid #cc000044", color: "#cc0000", cursor: "pointer",
         }}>登入 / 註冊</button>
@@ -238,11 +238,11 @@ function HomeTab({ navigate }) {
         <div style={{ fontSize: 11, color: "#555", marginBottom: 12 }}>
           以上為示範資料，登入後顯示你的真實紀錄
         </div>
-        <button style={{
+        <button onClick={() => navigate("/auth")} style={{
           padding: "8px 28px", borderRadius: 10,
           background: "#cc0000", border: "none",
           color: "#fff", fontSize: 13, fontWeight: 800, cursor: "pointer",
-        }}>登入 / 註冊（即將開放）</button>
+        }}>登入 / 註冊</button>
       </div>
     </div>
   );
