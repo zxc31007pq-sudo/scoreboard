@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   updateProfile,
 } from "firebase/auth";
+import { useEffect } from "react";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
 
@@ -65,18 +66,26 @@ export default function Auth() {
     setLoading(false);
   };
 
+  // Handle redirect result on page load
+  useEffect(() => {
+    getRedirectResult(auth).then(async (cred) => {
+      if (cred) {
+        await createUserProfile(cred.user);
+        navigate("/player");
+      }
+    }).catch(() => {});
+  }, []);
+
   const handleGoogle = async () => {
     setLoading(true);
     setError("");
     try {
       const provider = new GoogleAuthProvider();
-      const cred = await signInWithPopup(auth, provider);
-      await createUserProfile(cred.user);
-      navigate("/player");
+      await signInWithRedirect(auth, provider);
     } catch (e) {
       setError("Google 登入失敗，請再試一次");
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
