@@ -23,6 +23,7 @@ export default function ClaimMatch() {
   const [error, setError] = useState("");
   const [selectedSide, setSelectedSide] = useState(null);
   const [claimResult, setClaimResult] = useState(null);
+  const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     // Load match data
@@ -205,7 +206,7 @@ export default function ClaimMatch() {
                   </div>
                 )}
                 {user ? (
-                  <button onClick={handleClaim} disabled={claiming || !selectedSide} style={{
+                  <button onClick={() => { if (!selectedSide) { setError("請選擇你是哪一隊"); return; } setConfirming(true); }} disabled={claiming || !selectedSide} style={{
                     width: "100%", padding: "12px 0", borderRadius: 10,
                     background: claiming || !selectedSide ? "#333" : "#cc0000",
                     border: "none", color: "#fff", fontSize: 14, fontWeight: 800,
@@ -236,6 +237,71 @@ export default function ClaimMatch() {
           </>
         )}
       </div>
+
+      {/* Confirm modal */}
+      {confirming && (
+        <div style={{
+          position: "fixed", inset: 0, background: "#000000cc",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 300, padding: 16,
+        }}>
+          <div style={{
+            width: "100%", maxWidth: 360,
+            background: "#111", border: "1px solid #1e1e1e",
+            borderRadius: 20, padding: "28px 24px",
+            display: "flex", flexDirection: "column", gap: 14,
+          }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>🤔</div>
+              <div style={{ fontSize: 16, fontWeight: 900, color: "#f0f0f0", marginBottom: 4 }}>確認認領</div>
+              <div style={{ fontSize: 12, color: "#555" }}>請確認以下資訊正確</div>
+            </div>
+
+            <div style={{
+              background: "#0a0a0a", borderRadius: 12, padding: "14px 16px",
+              display: "flex", flexDirection: "column", gap: 8,
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 12, color: "#555" }}>你的隊伍</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#f0f0f0" }}>
+                  {selectedSide === "A" ? match?.teamA : match?.teamB}
+                </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 12, color: "#555" }}>比賽結果</span>
+                <span style={{ fontSize: 13, fontWeight: 800,
+                  color: match?.winner === selectedSide ? "#22c55e" : "#ef4444"
+                }}>
+                  {match?.winner === selectedSide ? "🏆 勝" : "敗"}
+                </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 12, color: "#555" }}>積分</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#f0f0f0" }}>
+                  +{match?.winner === selectedSide ? 10 : 3}
+                </span>
+              </div>
+            </div>
+
+            <div style={{ fontSize: 11, color: "#444", textAlign: "center", lineHeight: 1.6 }}>
+              認領後 3 小時內可修改隊伍選擇
+            </div>
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => setConfirming(false)} style={{
+                flex: 1, padding: "11px 0", borderRadius: 10,
+                background: "#1a1a1a", border: "1px solid #2a2a2a",
+                color: "#555", fontSize: 13, cursor: "pointer",
+              }}>返回修改</button>
+              <button onClick={() => { setConfirming(false); handleClaim(); }} style={{
+                flex: 1, padding: "11px 0", borderRadius: 10,
+                background: "#cc0000", border: "none",
+                color: "#fff", fontSize: 13, fontWeight: 800, cursor: "pointer",
+              }}>確認認領</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

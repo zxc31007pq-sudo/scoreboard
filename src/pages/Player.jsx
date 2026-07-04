@@ -264,7 +264,7 @@ function HomeTab({ user, profile, displayName, records, navigate }) {
         <div>
           <div style={{ fontSize: 11, color: "#444", letterSpacing: 2, marginBottom: 10 }}>最近比賽</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {records.slice(0,3).map(r => <RecordRow key={r.id} record={r} />)}
+            {records.slice(0,3).map(r => <RecordRow key={r.id} record={r} user={user} onUpdate={() => window.location.reload()} />)}
           </div>
         </div>
       )}
@@ -273,29 +273,81 @@ function HomeTab({ user, profile, displayName, records, navigate }) {
 }
 
 // ── Record Row ──
-function RecordRow({ record }) {
+function RecordRow({ record, user, onUpdate }) {
+  const [editing, setEditing] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [editError, setEditError] = useState("");
+
   const icon = { basketball:"🏀", badminton:"🏸", tabletennis:"🏓", pickleball:"🥒" }[record.sport] || "🏅";
   const date = record.createdAt?.toDate ? record.createdAt.toDate().toLocaleDateString("zh-TW") : "";
+
+  // Check if within 3 hours (editable)
+  const createdAt = record.createdAt?.toDate ? record.createdAt.toDate() : new Date(record.createdAt);
+  const editable = record.matchId && (new Date() - createdAt) < 3 * 60 * 60 * 1000;
+
+  const handleUpdate = async (newSide) => {
+    setUpdating(true);
+    setEditError("");
+    try {
+      const { updateClaimSide } = await import("../matchService");
+      const result = await updateClaimSide(record.matchId, user.uid, newSide);
+      setEditing(false);
+      onUpdate && onUpdate();
+    } catch (e) {
+      setEditError(e.message);
+    }
+    setUpdating(false);
+  };
+
   return (
     <div style={{
       background: "#111", border: "1px solid #1e1e1e", borderRadius: 10,
-      padding: "12px 14px", display: "flex", alignItems: "center", gap: 12,
+      padding: "12px 14px",
     }}>
-      <span style={{ fontSize: 20 }}>{icon}</span>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: "#f0f0f0" }}>
-          {record.sport === "basketball" ? "籃球" : record.sport === "badminton" ? "羽球" : record.sport === "tabletennis" ? "桌球" : "匹克球"} {record.mode}
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <span style={{ fontSize: 20 }}>{icon}</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#f0f0f0" }}>
+            {record.sport === "basketball" ? "籃球" : record.sport === "badminton" ? "羽球" : record.sport === "tabletennis" ? "桌球" : "匹克球"} {record.mode}
+          </div>
+          <div style={{ fontSize: 10, color: "#555", marginTop: 2 }}>
+            vs {record.opponent} · {date}
+          </div>
         </div>
-        <div style={{ fontSize: 10, color: "#555", marginTop: 2 }}>
-          vs {record.opponent} · {date}
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: record.result === "勝" ? "#22c55e" : "#ef4444" }}>
+            {record.result} {record.score}
+          </div>
+          <div style={{ fontSize: 10, color: "#555", marginTop: 2 }}>+{record.pts} 積分</div>
         </div>
+        {editable && (
+          <button onClick={() => setEditing(!editing)} style={{
+            padding: "3px 8px", borderRadius: 6, fontSize: 10, fontWeight: 700,
+            background: "#1a1a1a", border: "1px solid #2a2a2a",
+            color: "#555", cursor: "pointer", flexShrink: 0,
+          }}>修改</button>
+        )}
       </div>
-      <div style={{ textAlign: "right" }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: record.result === "勝" ? "#22c55e" : "#ef4444" }}>
-          {record.result} {record.score}
+
+      {editing && (
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #1a1a1a" }}>
+          <div style={{ fontSize: 11, color: "#555", marginBottom: 8 }}>選擇正確的隊伍：</div>
+          <div style={{ display: "flex", gap: 8 }}>
+            {["A", "B"].map(side => (
+              <button key={side} onClick={() => handleUpdate(side)} disabled={updating} style={{
+                flex: 1, padding: "8px 0", borderRadius: 8, fontSize: 12, fontWeight: 700,
+                background: record.side === side ? "#cc000022" : "#1a1a1a",
+                border: `1px solid ${record.side === side ? "#cc0000" : "#2a2a2a"}`,
+                color: record.side === side ? "#cc0000" : "#555",
+                cursor: updating ? "not-allowed" : "pointer",
+              }}>
+                {side === "A" ? "主隊" : "客隊"} {record.side === side ? "（目前）" : ""}
+              </button>
+            ))}
+          </div>
+          {editError && <div style={{ fontSize: 11, color: "#f87171", marginTop: 6 }}>{editError}</div>}
         </div>
-        <div style={{ fontSize: 10, color: "#555", marginTop: 2 }}>+{record.pts} 積分</div>
-      </div>
+      )}
     </div>
   );
 }
@@ -340,7 +392,7 @@ function RecordsTab({ user, records, navigate }) {
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {filtered.map(r => <RecordRow key={r.id} record={r} />)}
+          {filtered.map(r => <RecordRow key={r.id} record={r} user={user} onUpdate={() => window.location.reload()} />)}
         </div>
       )}
     </div>

@@ -72,3 +72,39 @@ export async function claimMatch(matchId, uid, { name, side }) {
 
   return { result: isWinner ? "勝" : "敗", pts: isWinner ? 10 : 3 };
 }
+
+// 修改已認領的隊伍（3小時內有效）
+export async function updateClaimSide(matchId, uid, newSide) {
+  const matchRef = doc(db, "matches", matchId);
+  const snap = await getDoc(matchRef);
+  if (!snap.exists()) throw new Error("比賽不存在");
+
+  const match = snap.data();
+
+  // 檢查是否已過期
+  const now = new Date();
+  const expires = match.expiresAt.toDate ? match.expiresAt.toDate() : new Date(match.expiresAt);
+  if (now > expires) throw new Error("修改時間已過期（超過3小時）");
+
+  // 找到該用戶的紀錄
+  const recordsRef = collection(db, "users", uid, "records");
+  const q = await getDocs(recordsRef);
+  const record = q.docs.find(d => d.data().matchId === matchId);
+  if (!record) throw new Error("找不到此比賽紀錄");
+
+  // 重新計算勝負
+  const isWinner = match.winner === newSide;
+  const score = newSide === "A"
+    ? `${match.scoreA}:${match.scoreB}`
+    : `${match.scoreB}:${match.scoreA}`;
+
+  await updateDoc(doc(db, "users", uid, "records", record.id), {
+    side: newSide,
+    opponent: newSide === "A" ? match.teamB : match.teamA,
+    score,
+    result: isWinner ? "勝" : "敗",
+    pts: isWinner ? 10 : 3,
+  });
+
+  return { result: isWinner ? "勝" : "敗", pts: isWinner ? 10 : 3 };
+}
