@@ -9,6 +9,7 @@ import Basketball3v3 from "./pages/Basketball3v3";
 import Player from "./pages/Player";
 import Auth from "./pages/Auth";
 import ClaimMatch from "./pages/ClaimMatch";
+import PublicProfile from "./pages/PublicProfile";
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/player" element={<Player />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/claim/:matchId" element={<ClaimMatch />} />
+        <Route path="/profile/:uid" element={<PublicProfile />} />
       </Routes>
     </BrowserRouter>
   );
