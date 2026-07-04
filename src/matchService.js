@@ -1,4 +1,4 @@
-import { collection, addDoc, getDoc, doc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, getDoc, getDocs, doc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 
 // 產生比賽紀錄並存入 Firestore
