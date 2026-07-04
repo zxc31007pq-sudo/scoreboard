@@ -99,7 +99,7 @@ export default function PublicProfile() {
         marginTop: 24, textAlign: "center",
         display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
       }}>
-        <div style={{ fontSize: 12, color: "#444" }}>截圖後分享到 IG / LINE</div>
+        <div style={{ fontSize: 12, color: "#444" }}>截圖後分享到任何地方</div>
         <button onClick={() => navigate("/auth")} style={{
           padding: "10px 28px", borderRadius: 10,
           background: "#cc0000", border: "none",

@@ -19,9 +19,14 @@ export default function ShareCardModal({ user, records, displayName, onClose }) 
   };
 
   const profileUrl = `${BASE_URL}/profile/${user.uid}?sports=${selected.join(",")}`;
-  const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(
-    `🏆 查看我的運動戰績！\n${profileUrl}`
-  )}`;
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(profileUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    });
+  };
 
   return (
     <div style={{
@@ -127,18 +132,27 @@ export default function ShareCardModal({ user, records, displayName, onClose }) 
               截圖後可分享到任何社群媒體
             </div>
 
-            {/* Share to LINE */}
-            <a href={lineUrl} target="_blank" rel="noreferrer" style={{
-              width: "100%", padding: "12px 0", borderRadius: 10,
-              background: "#06C755", border: "none",
-              color: "#fff", fontSize: 14, fontWeight: 800,
-              cursor: "pointer", textDecoration: "none",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-              boxSizing: "border-box",
+            {/* Copy link */}
+            <div style={{
+              background: "#0a0a0a", borderRadius: 10,
+              padding: "10px 14px", display: "flex", alignItems: "center", gap: 8,
             }}>
-              <span style={{ fontSize: 18 }}>💬</span>
-              分享連結到 LINE
-            </a>
+              <div style={{
+                flex: 1, fontSize: 11, color: "#555",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>{profileUrl}</div>
+              <button onClick={handleCopy} style={{
+                padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 700,
+                background: copied ? "#14532d" : "#cc0000",
+                border: "none", color: "#fff", cursor: "pointer",
+                flexShrink: 0, transition: "background .2s",
+              }}>
+                {copied ? "✓ 已複製" : "複製連結"}
+              </button>
+            </div>
+            <div style={{ fontSize: 11, color: "#444", textAlign: "center" }}>
+              複製後可分享到 LINE・IG・FB・任何地方
+            </div>
 
             <button onClick={() => setStep(1)} style={{
               width: "100%", padding: "8px 0", borderRadius: 10,
