@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc, collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { onAuthStateChanged, signOut, deleteUser, reauthenticateWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { doc, getDoc, collection, query, orderBy, limit, getDocs, deleteDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
 
 const RANK_SYSTEM = [
@@ -159,8 +159,12 @@ const SPORT_ICONS = { basketball:"🏀", badminton:"🏸", tabletennis:"🏓", p
 
 // ── Home Tab ──
 function HomeTab({ user, profile, displayName, records, navigate }) {
+  const [statFilter, setStatFilter] = useState("全部");
+  const sportMap = { "全部": null, "籃球": "basketball", "羽球": "badminton", "匹克球": "pickleball", "桌球": "tabletennis" };
+  const filteredRecords = statFilter === "全部" ? records : records.filter(r => r.sport === sportMap[statFilter]);
   const pts = records.reduce((a, r) => a + (r.pts || 0), 0);
-  const wins = records.filter(r => r.result === "勝").length;
+  const wins = filteredRecords.filter(r => r.result === "勝").length;
+  const totalFiltered = filteredRecords.length;
   const rank = getRank(pts);
 
   if (!user) {
@@ -231,12 +235,23 @@ function HomeTab({ user, profile, displayName, records, navigate }) {
           }}>分享履歷卡</button>
         </div>
 
+        {/* Sport filter */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+          {["全部", "籃球", "羽球", "匹克球", "桌球"].map(f => (
+            <button key={f} onClick={() => setStatFilter(f)} style={{
+              padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700,
+              background: statFilter === f ? "#cc0000" : "#1a1a1a",
+              border: `1px solid ${statFilter === f ? "#cc0000" : "#2a2a2a"}`,
+              color: statFilter === f ? "#fff" : "#555", cursor: "pointer",
+            }}>{f}</button>
+          ))}
+        </div>
         {/* Stats */}
         <div style={{ display: "flex", borderTop: "1px solid #1e1e1e", paddingTop: 14 }}>
           {[
-            { label: "總場次", value: records.length },
-            { label: "勝場",   value: wins },
-            { label: "勝率",   value: records.length ? Math.round(wins/records.length*100)+"%" : "-%"  },
+            { label: "場次", value: totalFiltered },
+            { label: "勝場",  value: wins },
+            { label: "勝率",  value: totalFiltered ? Math.round(wins/totalFiltered*100)+"%" : "-%"  },
             { label: "總積分", value: pts },
           ].map((s, i) => (
             <div key={i} style={{
@@ -482,7 +497,37 @@ function RankTab({ user, records, navigate }) {
 
 // ── Profile Tab ──
 function ProfileTab({ user, profile, displayName, onSignOut, navigate }) {
-  const [privacy, setPrivacy] = useState(profile?.privacy || "private");
+  const [deleting, setDeleting] = useState(false);
+  const [delConfirm, setDelConfirm] = useState(false);
+  const [delError, setDelError] = useState("");
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDelError("");
+    try {
+      // Re-authenticate with Google first (Firebase requires recent login)
+      const provider = new GoogleAuthProvider();
+      await reauthenticateWithPopup(user, provider);
+
+      // Delete all records
+      const rSnap = await getDocs(collection(db, "users", user.uid, "records"));
+      for (const d of rSnap.docs) {
+        await deleteDoc(doc(db, "users", user.uid, "records", d.id));
+      }
+      // Delete user profile
+      await deleteDoc(doc(db, "users", user.uid));
+      // Delete auth account
+      await deleteUser(user);
+      navigate("/");
+    } catch (e) {
+      if (e.code === "auth/popup-closed-by-user") {
+        setDelError("取消刪除");
+      } else {
+        setDelError(`刪除失敗：${e.message}`);
+      }
+      setDeleting(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -513,33 +558,6 @@ function ProfileTab({ user, profile, displayName, onSignOut, navigate }) {
         }}>免費版</div>
       </div>
 
-      {/* Privacy */}
-      <div style={{ background: "#111", border: "1px solid #1e1e1e", borderRadius: 14, padding: "16px" }}>
-        <div style={{ fontSize: 12, color: "#555", letterSpacing: 2, marginBottom: 12 }}>隱私設定</div>
-        {[
-          { key: "private", label: "完全私人", desc: "只有自己看得到" },
-          { key: "friends", label: "朋友可見", desc: "追蹤者才能查看" },
-          { key: "public",  label: "完全公開", desc: "任何人都可以搜尋" },
-        ].map(p => (
-          <div key={p.key} onClick={() => setPrivacy(p.key)} style={{
-            display: "flex", alignItems: "center", gap: 12,
-            padding: "10px 0", borderBottom: "1px solid #1a1a1a", cursor: "pointer",
-          }}>
-            <div style={{
-              width: 18, height: 18, borderRadius: "50%",
-              border: `2px solid ${privacy === p.key ? "#cc0000" : "#333"}`,
-              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-            }}>
-              {privacy === p.key && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#cc0000" }} />}
-            </div>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#f0f0f0" }}>{p.label}</div>
-              <div style={{ fontSize: 11, color: "#555" }}>{p.desc}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
       {/* Account */}
       <div style={{ background: "#111", border: "1px solid #1e1e1e", borderRadius: 14, padding: "16px" }}>
         <div style={{ fontSize: 12, color: "#555", letterSpacing: 2, marginBottom: 12 }}>帳號管理</div>
@@ -547,15 +565,56 @@ function ProfileTab({ user, profile, displayName, onSignOut, navigate }) {
           padding: "12px 0", borderBottom: "1px solid #1a1a1a",
           fontSize: 13, fontWeight: 600, color: "#f0f0f0", cursor: "pointer",
         }}>登出</div>
-        <div style={{
-          padding: "12px 0", borderBottom: "1px solid #1a1a1a",
-          fontSize: 13, fontWeight: 600, color: "#ef4444", cursor: "pointer",
-        }}>清除所有比賽紀錄</div>
-        <div style={{
+        <div onClick={() => setDelConfirm(true)} style={{
           padding: "12px 0",
           fontSize: 13, fontWeight: 600, color: "#ef4444", cursor: "pointer",
         }}>刪除帳號</div>
       </div>
+
+      {/* Delete confirm modal */}
+      {delConfirm && (
+        <div style={{
+          position: "fixed", inset: 0, background: "#000000cc",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 200, padding: 16,
+        }}>
+          <div style={{
+            width: "100%", maxWidth: 360,
+            background: "#111", border: "1px solid #1e1e1e",
+            borderRadius: 20, padding: "28px 24px",
+            display: "flex", flexDirection: "column", gap: 14,
+          }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 36, marginBottom: 8 }}>⚠️</div>
+              <div style={{ fontSize: 16, fontWeight: 900, color: "#f0f0f0", marginBottom: 6 }}>確認刪除帳號</div>
+              <div style={{ fontSize: 12, color: "#555", lineHeight: 1.7 }}>
+                此操作無法復原。<br/>
+                所有比賽紀錄、段位積分將永久刪除。<br/>
+                需要重新登入 Google 帳號確認身份。
+              </div>
+            </div>
+            {delError && (
+              <div style={{
+                background: "#ef444418", border: "1px solid #ef444444",
+                borderRadius: 8, padding: "8px 12px", fontSize: 12, color: "#f87171", textAlign: "center",
+              }}>{delError}</div>
+            )}
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => { setDelConfirm(false); setDelError(""); }} disabled={deleting} style={{
+                flex: 1, padding: "11px 0", borderRadius: 10,
+                background: "#1a1a1a", border: "1px solid #2a2a2a",
+                color: "#555", fontSize: 13, cursor: "pointer",
+              }}>取消</button>
+              <button onClick={handleDeleteAccount} disabled={deleting} style={{
+                flex: 1, padding: "11px 0", borderRadius: 10,
+                background: deleting ? "#333" : "#ef4444",
+                border: "none", color: "#fff", fontSize: 13, fontWeight: 800,
+                cursor: deleting ? "not-allowed" : "pointer",
+              }}>{deleting ? "刪除中..." : "確認刪除"}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
