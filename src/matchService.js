@@ -1,5 +1,5 @@
 import { collection, addDoc, getDoc, doc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
-import { db } from "../firebase";
+import { db } from "./firebase";
 
 // 產生比賽紀錄並存入 Firestore
 export async function createMatch({ sport, mode, teamA, teamB, scoreA, scoreB, winner }) {
