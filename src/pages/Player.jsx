@@ -49,6 +49,8 @@ export default function Player() {
   const [profile, setProfile] = useState(null); // Firestore profile
   const [loading, setLoading] = useState(true);
   const [records, setRecords] = useState([]);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
@@ -79,6 +81,16 @@ export default function Player() {
     await signOut(auth);
     setUser(null);
     setProfile(null);
+  };
+
+  const handleSaveName = async () => {
+    if (!nameInput.trim()) return;
+    try {
+      const { updateDoc } = await import("firebase/firestore");
+      await updateDoc(doc(db, "users", user.uid), { name: nameInput.trim() });
+      setProfile(p => ({ ...p, name: nameInput.trim() }));
+    } catch (e) { console.error(e); }
+    setEditingName(false);
   };
 
   if (loading) {
@@ -128,7 +140,7 @@ export default function Player() {
 
       {/* Content */}
       <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
-        {tab === "home"    && <HomeTab user={user} profile={profile} displayName={displayName} records={records} navigate={navigate} />}
+        {tab === "home"    && <HomeTab user={user} profile={profile} displayName={displayName} records={records} navigate={navigate} editingName={editingName} setEditingName={setEditingName} nameInput={nameInput} setNameInput={setNameInput} onSaveName={handleSaveName} />}
         {tab === "records" && <RecordsTab user={user} records={records} navigate={navigate} />}
         {tab === "rank"    && <RankTab user={user} records={records} navigate={navigate} />}
         {tab === "profile" && <ProfileTab user={user} profile={profile} displayName={displayName} onSignOut={handleSignOut} navigate={navigate} />}
@@ -156,9 +168,88 @@ export default function Player() {
 }
 
 const SPORT_ICONS = { basketball:"🏀", badminton:"🏸", tabletennis:"🏓", pickleball:"🥒" };
+const SPORT_LABELS = { basketball:"籃球", badminton:"羽球", tabletennis:"桌球", pickleball:"匹克球" };
+
+// Generate share card using html2canvas
+async function generateCard(name, records, wins, pts) {
+  // Create card element
+  const card = document.createElement("div");
+  card.style.cssText = `
+    position: fixed; left: -9999px; top: 0;
+    width: 360px; background: #0a0a0a;
+    border-radius: 20px; padding: 28px 24px;
+    font-family: 'Inter', sans-serif; color: #f0f0f0;
+  `;
+
+  const winRate = records.length ? Math.round(wins / records.length * 100) : 0;
+
+  // Group by sport
+  const bySport = {};
+  records.forEach(r => {
+    const key = r.sport;
+    if (!bySport[key]) bySport[key] = { wins: 0, total: 0 };
+    bySport[key].total++;
+    if (r.result === "勝") bySport[key].wins++;
+  });
+
+  const sportRows = Object.entries(bySport).map(([sport, s]) =>
+    `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e1e1e;">
+      <span style="font-size:13px;color:#aaa;">${SPORT_ICONS[sport] || "🏅"} ${SPORT_LABELS[sport] || sport}</span>
+      <span style="font-size:13px;font-weight:700;color:#f0f0f0;">${s.wins}勝 ${s.total - s.wins}敗</span>
+    </div>`
+  ).join("");
+
+  card.innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+      <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#cc0000,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;flex-shrink:0;">
+        ${name[0]?.toUpperCase() || "?"}
+      </div>
+      <div>
+        <div style="font-size:18px;font-weight:900;">${name}</div>
+        <div style="font-size:11px;color:#555;margin-top:2px;">scoreboard-neon-nine.vercel.app</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:0;background:#111;border-radius:12px;padding:14px;margin-bottom:16px;">
+      ${[
+        { label: "場次", value: records.length },
+        { label: "勝場", value: wins },
+        { label: "勝率", value: winRate + "%" },
+        { label: "積分", value: pts },
+      ].map((s, i) => `
+        <div style="flex:1;text-align:center;${i < 3 ? "border-right:1px solid #1e1e1e;" : ""}">
+          <div style="font-size:22px;font-weight:900;font-family:monospace;">${s.value}</div>
+          <div style="font-size:10px;color:#555;margin-top:2px;">${s.label}</div>
+        </div>
+      `).join("")}
+    </div>
+    ${sportRows ? `<div style="background:#111;border-radius:12px;padding:12px 14px;">${sportRows}</div>` : ""}
+    <div style="margin-top:14px;text-align:center;font-size:10px;color:#333;letter-spacing:1px;">SCOREBOARD · 戰績卡</div>
+  `;
+
+  document.body.appendChild(card);
+
+  try {
+    const html2canvas = (await import("html2canvas")).default;
+    const canvas = await html2canvas(card, {
+      backgroundColor: "#0a0a0a",
+      scale: 2,
+      useCORS: true,
+    });
+    document.body.removeChild(card);
+
+    // Download image
+    const link = document.createElement("a");
+    link.download = `${name}-戰績卡.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  } catch (e) {
+    document.body.removeChild(card);
+    alert("產生圖片失敗，請再試一次");
+  }
+}
 
 // ── Home Tab ──
-function HomeTab({ user, profile, displayName, records, navigate }) {
+function HomeTab({ user, profile, displayName, records, navigate, editingName, setEditingName, nameInput, setNameInput, onSaveName }) {
   const [statFilter, setStatFilter] = useState("全部");
   const sportMap = { "全部": null, "籃球": "basketball", "羽球": "badminton", "匹克球": "pickleball", "桌球": "tabletennis" };
   const filteredRecords = statFilter === "全部" ? records : records.filter(r => r.sport === sportMap[statFilter]);
@@ -217,8 +308,34 @@ function HomeTab({ user, profile, displayName, records, navigate }) {
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
           <Avatar name={displayName} size={56} />
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 18, fontWeight: 800, color: "#f0f0f0" }}>{displayName}</div>
-            <div style={{ fontSize: 12, color: "#555", marginTop: 2 }}>{user.email}</div>
+            {editingName ? (
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <input
+                  autoFocus
+                  value={nameInput}
+                  onChange={e => setNameInput(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && onSaveName()}
+                  style={{
+                    background: "#1a1a1a", border: "1px solid #cc0000",
+                    borderRadius: 8, color: "#f0f0f0", fontSize: 15,
+                    padding: "4px 10px", outline: "none", flex: 1,
+                    fontFamily: "inherit",
+                  }}
+                />
+                <button onClick={onSaveName} style={{
+                  padding: "4px 10px", borderRadius: 8, fontSize: 11, fontWeight: 700,
+                  background: "#cc0000", border: "none", color: "#fff", cursor: "pointer",
+                }}>儲存</button>
+              </div>
+            ) : (
+              <div onClick={() => { setNameInput(displayName); setEditingName(true); }} style={{
+                fontSize: 18, fontWeight: 800, color: "#f0f0f0", cursor: "pointer",
+                display: "flex", alignItems: "center", gap: 6,
+              }}>
+                {displayName}
+                <span style={{ fontSize: 12, color: "#444" }}>✏</span>
+              </div>
+            )}
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 4, marginTop: 6,
               background: rank.color + "18", border: `1px solid ${rank.color}44`,
@@ -228,11 +345,11 @@ function HomeTab({ user, profile, displayName, records, navigate }) {
               <span style={{ fontSize: 10, fontWeight: 700, color: rank.color }}>{rank.name}</span>
             </div>
           </div>
-          <button onClick={() => navigate("/auth")} style={{
+          <button onClick={() => generateCard(displayName, records, wins, pts)} style={{
             padding: "6px 14px", borderRadius: 8,
             background: "#cc000022", border: "1px solid #cc000044",
             color: "#cc0000", fontSize: 11, fontWeight: 700, cursor: "pointer",
-          }}>分享履歷卡</button>
+          }}>分享戰績卡</button>
         </div>
 
         {/* Sport filter */}
