@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { createMatch } from "../matchService";
 
 // QR Code 用 qrcode.react 套件
@@ -135,22 +136,20 @@ export default function MatchEndModal({ sport, mode, teamA, teamB, scoreA, score
               </div>
             </div>
 
-            {/* QR Code placeholder — 安裝 qrcode.react 後替換 */}
+            {/* QR Code */}
             <div style={{
               background: "#fff", borderRadius: 12, padding: "16px",
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
             }}>
-              <div style={{
-                width: 160, height: 160, background: "#f0f0f0",
-                borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
-                flexDirection: "column", gap: 8,
-              }}>
-                <div style={{ fontSize: 32 }}>📱</div>
-                <div style={{ fontSize: 10, color: "#999", textAlign: "center" }}>
-                  QR Code<br/>（套件安裝後顯示）
-                </div>
-              </div>
-              <div style={{ fontSize: 9, color: "#999", wordBreak: "break-all", textAlign: "center" }}>
+              <QRCodeSVG
+                value={claimUrl}
+                size={180}
+                bgColor="#ffffff"
+                fgColor="#000000"
+                level="M"
+                includeMargin={false}
+              />
+              <div style={{ fontSize: 9, color: "#999", wordBreak: "break-all", textAlign: "center", maxWidth: 180 }}>
                 {claimUrl}
               </div>
             </div>
