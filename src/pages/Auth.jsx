@@ -1,14 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   GoogleAuthProvider,
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   updateProfile,
 } from "firebase/auth";
-import { useEffect } from "react";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
 
@@ -30,20 +30,34 @@ async function createUserProfile(user, extraData = {}) {
 
 export default function Auth() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState("login"); // "login" | "register"
+  const [mode, setMode] = useState("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Handle redirect result
+  useEffect(() => {
+    setLoading(true);
+    getRedirectResult(auth)
+      .then(async (cred) => {
+        if (cred) {
+          await createUserProfile(cred.user);
+          navigate("/player");
+        }
+      })
+      .catch((e) => {
+        console.error("Redirect error:", e);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
   const handleEmail = async () => {
     if (!email || !password) { setError("請填寫所有欄位"); return; }
     if (mode === "register" && !name) { setError("請填寫姓名"); return; }
     if (password.length < 6) { setError("密碼至少 6 個字元"); return; }
-
-    setLoading(true);
-    setError("");
+    setLoading(true); setError("");
     try {
       if (mode === "register") {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -61,30 +75,40 @@ export default function Auth() {
         "auth/invalid-email": "Email 格式不正確",
         "auth/invalid-credential": "Email 或密碼錯誤",
       };
-      setError(msgs[e.code] || "發生錯誤，請再試一次");
+      setError(msgs[e.code] || `發生錯誤：${e.code}`);
     }
     setLoading(false);
   };
 
-  // Handle redirect result on page load
-  useEffect(() => {
-    getRedirectResult(auth).then(async (cred) => {
-      if (cred) {
-        await createUserProfile(cred.user);
-        navigate("/player");
-      }
-    }).catch(() => {});
-  }, []);
-
   const handleGoogle = async () => {
-    setLoading(true);
     setError("");
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    // 先試 popup，失敗再用 redirect
     try {
-      const provider = new GoogleAuthProvider();
-      await signInWithRedirect(auth, provider);
+      setLoading(true);
+      const cred = await signInWithPopup(auth, provider);
+      await createUserProfile(cred.user);
+      navigate("/player");
     } catch (e) {
-      setError("Google 登入失敗，請再試一次");
-      setLoading(false);
+      console.error("Popup error:", e.code, e.message);
+      if (
+        e.code === "auth/popup-blocked" ||
+        e.code === "auth/popup-closed-by-user" ||
+        e.code === "auth/cancelled-popup-request"
+      ) {
+        // Fallback to redirect
+        try {
+          await signInWithRedirect(auth, provider);
+        } catch (e2) {
+          setError("Google 登入失敗，請使用 Email 註冊");
+          setLoading(false);
+        }
+      } else {
+        setError(`Google 登入失敗：${e.code}`);
+        setLoading(false);
+      }
     }
   };
 
@@ -93,11 +117,8 @@ export default function Auth() {
       height: "100vh", background: "#0a0a0a",
       fontFamily: "'Inter','Helvetica Neue',sans-serif",
       display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center",
-      padding: "0 24px",
+      alignItems: "center", justifyContent: "center", padding: "0 24px",
     }}>
-
-      {/* Back */}
       <button onClick={() => navigate("/")} style={{
         position: "absolute", top: 16, left: 16,
         padding: "4px 12px", borderRadius: 6, fontSize: 11, fontWeight: 700,
@@ -105,14 +126,12 @@ export default function Auth() {
         color: "#555", cursor: "pointer",
       }}>← 首頁</button>
 
-      {/* Card */}
       <div style={{
         width: "100%", maxWidth: 380,
         background: "#111", border: "1px solid #1e1e1e",
         borderRadius: 20, padding: "32px 28px",
         display: "flex", flexDirection: "column", gap: 16,
       }}>
-        {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 4 }}>
           <div style={{ fontSize: 32, marginBottom: 8 }}>👤</div>
           <div style={{ fontSize: 18, fontWeight: 900, color: "#f0f0f0" }}>
@@ -123,7 +142,6 @@ export default function Auth() {
           </div>
         </div>
 
-        {/* Google button */}
         <button onClick={handleGoogle} disabled={loading} style={{
           width: "100%", padding: "11px 0", borderRadius: 10,
           background: "#1a1a1a", border: "1px solid #2a2a2a",
@@ -135,14 +153,12 @@ export default function Auth() {
           使用 Google 帳號{mode === "login" ? "登入" : "註冊"}
         </button>
 
-        {/* Divider */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ flex: 1, height: 1, background: "#1e1e1e" }} />
           <span style={{ fontSize: 11, color: "#444" }}>或用 Email</span>
           <div style={{ flex: 1, height: 1, background: "#1e1e1e" }} />
         </div>
 
-        {/* Name (register only) */}
         {mode === "register" && (
           <input value={name} onChange={e => setName(e.target.value)}
             placeholder="你的名字"
@@ -154,10 +170,8 @@ export default function Auth() {
             }} />
         )}
 
-        {/* Email */}
         <input value={email} onChange={e => setEmail(e.target.value)}
-          placeholder="Email"
-          type="email"
+          placeholder="Email" type="email"
           style={{
             width: "100%", padding: "11px 14px", borderRadius: 10,
             background: "#1a1a1a", border: "1px solid #2a2a2a",
@@ -165,10 +179,8 @@ export default function Auth() {
             fontFamily: "inherit", boxSizing: "border-box",
           }} />
 
-        {/* Password */}
         <input value={password} onChange={e => setPassword(e.target.value)}
-          placeholder="密碼（至少 6 個字元）"
-          type="password"
+          placeholder="密碼（至少 6 個字元）" type="password"
           style={{
             width: "100%", padding: "11px 14px", borderRadius: 10,
             background: "#1a1a1a", border: "1px solid #2a2a2a",
@@ -176,7 +188,6 @@ export default function Auth() {
             fontFamily: "inherit", boxSizing: "border-box",
           }} />
 
-        {/* Error */}
         {error && (
           <div style={{
             background: "#ef444418", border: "1px solid #ef444444",
@@ -185,7 +196,6 @@ export default function Auth() {
           }}>{error}</div>
         )}
 
-        {/* Submit */}
         <button onClick={handleEmail} disabled={loading} style={{
           width: "100%", padding: "12px 0", borderRadius: 10,
           background: loading ? "#333" : "#cc0000",
@@ -195,7 +205,6 @@ export default function Auth() {
           {loading ? "處理中..." : mode === "login" ? "登入" : "建立帳號"}
         </button>
 
-        {/* Switch mode */}
         <div style={{ textAlign: "center", fontSize: 12, color: "#555" }}>
           {mode === "login" ? (
             <>還沒有帳號？<span onClick={() => { setMode("register"); setError(""); }} style={{ color: "#cc0000", cursor: "pointer", fontWeight: 700 }}>建立帳號</span></>
