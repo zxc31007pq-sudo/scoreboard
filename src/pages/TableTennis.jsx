@@ -125,7 +125,7 @@ export default function TableTennis() {
   const [setupDone, setSetupDone] = useState(false);
 
   const maxSets = format === "bo3" ? 3 : 5;
-  const winsNeeded = format === "bo3" ? 2 : 3;
+  const winsNeeded = format === "bo1" ? 1 : format === "bo3" ? 2 : 3;
 
   const [scores, setScores] = useState([[0, 0]]);
   const [setWins, setSetWins] = useState([0, 0]);
@@ -203,7 +203,7 @@ export default function TableTennis() {
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
           <div style={{ fontSize: 12, color: "#888", letterSpacing: 2 }}>選擇賽制</div>
           <div style={{ display: "flex", gap: 12 }}>
-            {[{ key: "bo3", label: "三局兩勝" }, { key: "bo5", label: "五局三勝" }].map(f => (
+            {[{ key: "bo1", label: "一局決勝" }, { key: "bo3", label: "三局兩勝" }, { key: "bo5", label: "五局三勝" }].map(f => (
               <button key={f.key} onClick={() => setFormat(f.key)} style={{
                 padding: "11px 28px", borderRadius: 10, fontSize: 14, fontWeight: 700,
                 background: format === f.key ? COLORS[0] : "#f5f5f5",
@@ -272,7 +272,7 @@ export default function TableTennis() {
           <span style={{
             fontSize: 10, background: "#f0f0f0", border: "1px solid #ddd",
             borderRadius: 4, padding: "2px 8px", color: "#888",
-          }}>{format === "bo3" ? "三局兩勝" : "五局三勝"}</span>
+          }}>{format === "bo1" ? "一局決勝" : format === "bo3" ? "三局兩勝" : "五局三勝"}</span>
         </div>
 
         {/* Set wins */}
@@ -294,11 +294,13 @@ export default function TableTennis() {
           <span style={{ fontSize: 12, color: "#aaa" }}>第 {curSet + 1} 局</span>
         </div>
 
-        <button onClick={() => setShowMatchEnd(true)} style={{
-          fontSize: 11, padding: "4px 12px", borderRadius: 6,
-          background: "#cc000022", border: "1px solid #cc000044",
-          color: "#cc0000", cursor: "pointer", marginRight: 6,
-        }}>結束比賽</button>
+        {winner !== null && (
+          <button onClick={() => setShowMatchEnd(true)} style={{
+            fontSize: 11, padding: "4px 12px", borderRadius: 6,
+            background: "#cc000022", border: "1px solid #cc000044",
+            color: "#cc0000", cursor: "pointer", marginRight: 6,
+          }}>結束比賽</button>
+        )}
         <button onClick={() => { setSetupDone(false); setScores([[0, 0]]); setSetWins([0, 0]); setHistory([]); setAlert(null); }} style={{
           fontSize: 11, padding: "4px 12px", borderRadius: 6,
           background: "#f5f5f5", border: "1px solid #ddd",
