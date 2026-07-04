@@ -479,11 +479,13 @@ export default function Pickleball() {
           fontSize: 11, padding: "4px 12px", borderRadius: 6,
           background: "#f5f5f5", border: "1px solid #ddd", color: "#888", cursor: "pointer",
         }}>重新設定</button>
-        <button onClick={() => setShowMatchEnd(true)} style={{
-          fontSize: 11, padding: "4px 12px", borderRadius: 6,
-          background: "#cc000022", border: "1px solid #cc000044",
-          color: "#cc0000", cursor: "pointer", marginLeft: 6,
-        }}>結束比賽</button>
+        {winner !== null && (
+          <button onClick={() => setShowMatchEnd(true)} style={{
+            fontSize: 11, padding: "4px 12px", borderRadius: 6,
+            background: "#cc000022", border: "1px solid #cc000044",
+            color: "#cc0000", cursor: "pointer", marginLeft: 6,
+          }}>結束比賽</button>
+        )}
       </div>
 
       {showMatchEnd && (

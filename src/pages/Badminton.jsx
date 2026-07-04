@@ -157,6 +157,8 @@ export default function Badminton() {
   const [history, setHistory]   = useState([]);
   const [alert, setAlert]       = useState(null);
   const [showMatchEnd, setShowMatchEnd] = useState(false);
+
+  const curSet = scores.length - 1;
   const [s0, s1] = scores[curSet];
   const winner = calcWinner(s0, s1);
 
