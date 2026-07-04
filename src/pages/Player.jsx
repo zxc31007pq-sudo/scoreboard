@@ -130,7 +130,7 @@ export default function Player() {
       <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
         {tab === "home"    && <HomeTab user={user} profile={profile} displayName={displayName} records={records} navigate={navigate} />}
         {tab === "records" && <RecordsTab user={user} records={records} navigate={navigate} />}
-        {tab === "rank"    && <RankTab user={user} navigate={navigate} />}
+        {tab === "rank"    && <RankTab user={user} records={records} navigate={navigate} />}
         {tab === "profile" && <ProfileTab user={user} profile={profile} displayName={displayName} onSignOut={handleSignOut} navigate={navigate} />}
       </div>
 
@@ -400,7 +400,7 @@ function RecordsTab({ user, records, navigate }) {
 }
 
 // ── Rank Tab ──
-function RankTab({ user, navigate }) {
+function RankTab({ user, records, navigate }) {
   if (!user) {
     return (
       <div style={{ padding: 16, textAlign: "center" }}>
@@ -414,24 +414,38 @@ function RankTab({ user, navigate }) {
     );
   }
 
+  // Calculate pts per sport+mode from records
+  const calcPts = (sport, mode) =>
+    records
+      .filter(r => r.sport === sport && r.mode === mode)
+      .reduce((sum, r) => sum + (r.pts || 0), 0);
+
   const modes = [
-    { sport: "籃球", mode: "5v5", pts: 0 },
-    { sport: "籃球", mode: "3v3", pts: 0 },
-    { sport: "羽球", mode: "單打", pts: 0 },
-    { sport: "匹克球", mode: "單打", pts: 0 },
-  ];
+    { label: "籃球", sport: "basketball", mode: "5v5" },
+    { label: "籃球", sport: "basketball", mode: "3v3" },
+    { label: "羽球", sport: "badminton",  mode: "單打" },
+    { label: "羽球", sport: "badminton",  mode: "雙打" },
+    { label: "匹克球", sport: "pickleball", mode: "單打" },
+    { label: "匹克球", sport: "pickleball", mode: "雙打" },
+    { label: "桌球", sport: "tabletennis", mode: "單打" },
+  ].map(m => ({ ...m, pts: calcPts(m.sport, m.mode) }))
+   .filter(m => m.pts > 0 || true); // show all modes
 
   return (
     <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
       <div style={{ fontSize: 11, color: "#444", letterSpacing: 2, marginBottom: 4 }}>本季段位</div>
       {modes.map((r, i) => {
         const rank = getRank(r.pts);
+        const next = RANK_SYSTEM.find(rs => rs.min > r.pts);
+        const progress = next
+          ? Math.min(100, ((r.pts - rank.min) / (rank.max - rank.min)) * 100)
+          : 100;
         return (
           <div key={i} style={{
             background: "#111", border: "1px solid #1e1e1e", borderRadius: 12, padding: "14px 16px",
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: "#f0f0f0" }}>{r.sport} {r.mode}</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#f0f0f0" }}>{r.label} {r.mode}</div>
               <div style={{
                 display: "flex", alignItems: "center", gap: 6,
                 background: rank.color + "18", border: `1px solid ${rank.color}44`,
@@ -441,10 +455,17 @@ function RankTab({ user, navigate }) {
                 <span style={{ fontSize: 13, fontWeight: 700, color: rank.color }}>{rank.name}</span>
               </div>
             </div>
-            <div style={{ height: 4, background: "#1e1e1e", borderRadius: 2 }}>
-              <div style={{ height: "100%", background: rank.color, width: "0%", borderRadius: 2 }} />
+            <div style={{ height: 4, background: "#1e1e1e", borderRadius: 2, overflow: "hidden" }}>
+              <div style={{
+                height: "100%", background: rank.color,
+                width: `${progress}%`, borderRadius: 2,
+                transition: "width .5s",
+              }} />
             </div>
-            <div style={{ fontSize: 9, color: "#444", marginTop: 4 }}>{r.pts} 積分</div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+              <span style={{ fontSize: 9, color: "#444" }}>{r.pts} 積分</span>
+              {next && <span style={{ fontSize: 9, color: "#444" }}>下一段位 {next.min} 分</span>}
+            </div>
           </div>
         );
       })}
