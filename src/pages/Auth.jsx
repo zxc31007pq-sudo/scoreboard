@@ -31,6 +31,9 @@ async function createUserProfile(user, extraData = {}) {
 export default function Auth() {
   const navigate = useNavigate();
   const [mode, setMode] = useState("login");
+
+  // Detect LINE browser
+  const isLineBrowser = /Line/i.test(navigator.userAgent);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -126,6 +129,26 @@ export default function Auth() {
         color: "#555", cursor: "pointer",
       }}>← 首頁</button>
 
+      {isLineBrowser && (
+        <div style={{
+          width: "100%", maxWidth: 380, marginBottom: 12,
+          background: "#06C75518", border: "1px solid #06C75544",
+          borderRadius: 12, padding: "12px 16px",
+          display: "flex", gap: 10, alignItems: "flex-start",
+        }}>
+          <span style={{ fontSize: 20, flexShrink: 0 }}>⚠️</span>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#f0f0f0", marginBottom: 4 }}>
+              請用瀏覽器開啟
+            </div>
+            <div style={{ fontSize: 11, color: "#888", lineHeight: 1.6 }}>
+              LINE 內建瀏覽器不支援 Google 登入。<br/>
+              請點右下角 <strong style={{ color: "#f0f0f0" }}>「⋯」→「用瀏覽器開啟」</strong><br/>
+              或複製連結貼到 Chrome / Safari。
+            </div>
+          </div>
+        </div>
+      )}
       <div style={{
         width: "100%", maxWidth: 380,
         background: "#111", border: "1px solid #1e1e1e",
@@ -142,15 +165,16 @@ export default function Auth() {
           </div>
         </div>
 
-        <button onClick={handleGoogle} disabled={loading} style={{
+        <button onClick={handleGoogle} disabled={loading || isLineBrowser} style={{
           width: "100%", padding: "11px 0", borderRadius: 10,
           background: "#1a1a1a", border: "1px solid #2a2a2a",
-          color: "#f0f0f0", fontSize: 13, fontWeight: 700,
-          cursor: "pointer", display: "flex", alignItems: "center",
+          color: isLineBrowser ? "#444" : "#f0f0f0", fontSize: 13, fontWeight: 700,
+          cursor: isLineBrowser ? "not-allowed" : "pointer",
+          display: "flex", alignItems: "center",
           justifyContent: "center", gap: 10,
         }}>
           <span style={{ fontSize: 16 }}>G</span>
-          使用 Google 帳號{mode === "login" ? "登入" : "註冊"}
+          {isLineBrowser ? "Google 登入（請用 Chrome 開啟）" : `使用 Google 帳號${mode === "login" ? "登入" : "註冊"}`}
         </button>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

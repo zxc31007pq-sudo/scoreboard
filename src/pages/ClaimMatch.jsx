@@ -13,6 +13,7 @@ const SPORT_NAMES = {
 
 export default function ClaimMatch() {
   const { matchId } = useParams();
+  const isLineBrowser = /Line/i.test(navigator.userAgent);
   const navigate = useNavigate();
   const [match, setMatch] = useState(null);
   const [user, setUser] = useState(null);
@@ -193,6 +194,16 @@ export default function ClaimMatch() {
                 )}
 
                 {/* CTA */}
+                {isLineBrowser && (
+                  <div style={{
+                    background: "#06C75518", border: "1px solid #06C75544",
+                    borderRadius: 10, padding: "10px 14px", marginBottom: 4,
+                    fontSize: 11, color: "#888", lineHeight: 1.6,
+                  }}>
+                    ⚠️ 請用 <strong style={{ color: "#f0f0f0" }}>Chrome 或 Safari</strong> 開啟此頁面才能登入認領。<br/>
+                    點右下角「⋯」→「用瀏覽器開啟」
+                  </div>
+                )}
                 {user ? (
                   <button onClick={handleClaim} disabled={claiming || !selectedSide} style={{
                     width: "100%", padding: "12px 0", borderRadius: 10,

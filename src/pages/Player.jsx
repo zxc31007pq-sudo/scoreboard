@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { auth, db } from "../firebase";
 
 const RANK_SYSTEM = [
@@ -48,6 +48,7 @@ export default function Player() {
   const [user, setUser] = useState(null);       // Firebase auth user
   const [profile, setProfile] = useState(null); // Firestore profile
   const [loading, setLoading] = useState(true);
+  const [records, setRecords] = useState([]);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
@@ -57,6 +58,12 @@ export default function Player() {
         try {
           const snap = await getDoc(doc(db, "users", u.uid));
           if (snap.exists()) setProfile(snap.data());
+
+          // Load records
+          const rSnap = await getDocs(
+            query(collection(db, "users", u.uid, "records"), orderBy("createdAt", "desc"), limit(20))
+          );
+          setRecords(rSnap.docs.map(d => ({ id: d.id, ...d.data() })));
         } catch (e) {
           console.error("Profile load error:", e);
         }
@@ -121,8 +128,8 @@ export default function Player() {
 
       {/* Content */}
       <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
-        {tab === "home"    && <HomeTab user={user} profile={profile} displayName={displayName} navigate={navigate} />}
-        {tab === "records" && <RecordsTab user={user} navigate={navigate} />}
+        {tab === "home"    && <HomeTab user={user} profile={profile} displayName={displayName} records={records} navigate={navigate} />}
+        {tab === "records" && <RecordsTab user={user} records={records} navigate={navigate} />}
         {tab === "rank"    && <RankTab user={user} navigate={navigate} />}
         {tab === "profile" && <ProfileTab user={user} profile={profile} displayName={displayName} onSignOut={handleSignOut} navigate={navigate} />}
       </div>
@@ -148,9 +155,12 @@ export default function Player() {
   );
 }
 
+const SPORT_ICONS = { basketball:"🏀", badminton:"🏸", tabletennis:"🏓", pickleball:"🥒" };
+
 // ── Home Tab ──
-function HomeTab({ user, profile, displayName, navigate }) {
-  const pts = 0; // 之後從 Firestore 讀取
+function HomeTab({ user, profile, displayName, records, navigate }) {
+  const pts = records.reduce((a, r) => a + (r.pts || 0), 0);
+  const wins = records.filter(r => r.result === "勝").length;
   const rank = getRank(pts);
 
   if (!user) {
@@ -224,9 +234,9 @@ function HomeTab({ user, profile, displayName, navigate }) {
         {/* Stats */}
         <div style={{ display: "flex", borderTop: "1px solid #1e1e1e", paddingTop: 14 }}>
           {[
-            { label: "總場次", value: 0 },
-            { label: "勝場",   value: 0 },
-            { label: "勝率",   value: "-%"  },
+            { label: "總場次", value: records.length },
+            { label: "勝場",   value: wins },
+            { label: "勝率",   value: records.length ? Math.round(wins/records.length*100)+"%" : "-%"  },
             { label: "總積分", value: pts },
           ].map((s, i) => (
             <div key={i} style={{
@@ -240,21 +250,63 @@ function HomeTab({ user, profile, displayName, navigate }) {
         </div>
       </div>
 
-      {/* No records yet */}
-      <div style={{
-        background: "#111", border: "1px dashed #1e1e1e", borderRadius: 14,
-        padding: "24px", textAlign: "center",
-      }}>
-        <div style={{ fontSize: 32, marginBottom: 8 }}>🏅</div>
-        <div style={{ fontSize: 14, fontWeight: 700, color: "#f0f0f0", marginBottom: 6 }}>還沒有比賽紀錄</div>
-        <div style={{ fontSize: 12, color: "#555" }}>打完比賽後掃 QR Code 認領紀錄，或手動新增</div>
+      {/* Recent records */}
+      {records.length === 0 ? (
+        <div style={{
+          background: "#111", border: "1px dashed #1e1e1e", borderRadius: 14,
+          padding: "24px", textAlign: "center",
+        }}>
+          <div style={{ fontSize: 32, marginBottom: 8 }}>🏅</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#f0f0f0", marginBottom: 6 }}>還沒有比賽紀錄</div>
+          <div style={{ fontSize: 12, color: "#555" }}>打完比賽後掃 QR Code 認領紀錄</div>
+        </div>
+      ) : (
+        <div>
+          <div style={{ fontSize: 11, color: "#444", letterSpacing: 2, marginBottom: 10 }}>最近比賽</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {records.slice(0,3).map(r => <RecordRow key={r.id} record={r} />)}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Record Row ──
+function RecordRow({ record }) {
+  const icon = { basketball:"🏀", badminton:"🏸", tabletennis:"🏓", pickleball:"🥒" }[record.sport] || "🏅";
+  const date = record.createdAt?.toDate ? record.createdAt.toDate().toLocaleDateString("zh-TW") : "";
+  return (
+    <div style={{
+      background: "#111", border: "1px solid #1e1e1e", borderRadius: 10,
+      padding: "12px 14px", display: "flex", alignItems: "center", gap: 12,
+    }}>
+      <span style={{ fontSize: 20 }}>{icon}</span>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: "#f0f0f0" }}>
+          {record.sport === "basketball" ? "籃球" : record.sport === "badminton" ? "羽球" : record.sport === "tabletennis" ? "桌球" : "匹克球"} {record.mode}
+        </div>
+        <div style={{ fontSize: 10, color: "#555", marginTop: 2 }}>
+          vs {record.opponent} · {date}
+        </div>
+      </div>
+      <div style={{ textAlign: "right" }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: record.result === "勝" ? "#22c55e" : "#ef4444" }}>
+          {record.result} {record.score}
+        </div>
+        <div style={{ fontSize: 10, color: "#555", marginTop: 2 }}>+{record.pts} 積分</div>
       </div>
     </div>
   );
 }
 
 // ── Records Tab ──
-function RecordsTab({ user, navigate }) {
+function RecordsTab({ user, records, navigate }) {
+  const [filter, setFilter] = useState("全部");
+  const filters = ["全部", "籃球", "羽球", "桌球", "匹克球"];
+  const sportMap = { "籃球":"basketball", "羽球":"badminton", "桌球":"tabletennis", "匹克球":"pickleball" };
+  const filtered = filter === "全部" ? records : records.filter(r => r.sport === sportMap[filter]);
+
   if (!user) {
     return (
       <div style={{ padding: 16, textAlign: "center" }}>
@@ -267,11 +319,30 @@ function RecordsTab({ user, navigate }) {
       </div>
     );
   }
+
   return (
-    <div style={{ padding: 16, textAlign: "center" }}>
-      <div style={{ fontSize: 32, margin: "32px 0 12px" }}>📋</div>
-      <div style={{ fontSize: 14, color: "#555" }}>還沒有比賽紀錄</div>
-      <div style={{ fontSize: 12, color: "#333", marginTop: 8 }}>打完比賽掃 QR Code 即可自動記錄</div>
+    <div style={{ padding: 16 }}>
+      <div style={{ display: "flex", gap: 6, marginBottom: 14, overflowX: "auto", paddingBottom: 4 }}>
+        {filters.map(f => (
+          <button key={f} onClick={() => setFilter(f)} style={{
+            padding: "5px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700,
+            background: filter === f ? "#cc0000" : "#1a1a1a",
+            border: `1px solid ${filter === f ? "#cc0000" : "#2a2a2a"}`,
+            color: filter === f ? "#fff" : "#555",
+            cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0,
+          }}>{f}</button>
+        ))}
+      </div>
+      {filtered.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "32px 0" }}>
+          <div style={{ fontSize: 32, marginBottom: 8 }}>📋</div>
+          <div style={{ fontSize: 14, color: "#555" }}>還沒有比賽紀錄</div>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {filtered.map(r => <RecordRow key={r.id} record={r} />)}
+        </div>
+      )}
     </div>
   );
 }
