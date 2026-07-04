@@ -148,6 +148,7 @@ export default function Badminton() {
   const [names, setNames]       = useState(["左隊","右隊"]);
   const [doubles, setDoubles]   = useState([["A","B"],["C","D"]]);
   const [editing, setEditing]   = useState(null);
+  const [format, setFormat] = useState(null); // "bo1" | "bo3"
   const [setupDone, setSetupDone] = useState(false);
 
   const [scores, setScores]     = useState([[0,0]]);
@@ -158,6 +159,7 @@ export default function Badminton() {
   const [alert, setAlert]       = useState(null);
   const [showMatchEnd, setShowMatchEnd] = useState(false);
 
+  const winsNeeded = format === "bo1" ? 1 : 2;
   const curSet = scores.length - 1;
   const [s0, s1] = scores[curSet];
   const winner = calcWinner(s0, s1);
@@ -184,7 +186,7 @@ export default function Badminton() {
       const nw=[...setWins]; nw[w]++;
       setSetWins(nw);
       setScores(prev=>{ const n=[...prev]; n[curSet]=[...cur]; return n; });
-      if (nw[w]>=2) { showAlert(`🏆 ${names[w]} 獲勝！`,8000); return; }
+      if (nw[w]>=winsNeeded) { showAlert(`🏆 ${names[w]} 獲勝！`,8000); setShowMatchEnd(false); return; }
       setTimeout(()=>{
         setScores(prev=>[...prev,[0,0]]);
         setServing(w); setServerIdx([0,0]);
@@ -243,6 +245,22 @@ export default function Badminton() {
         </div>
 
         {mode && (
+          <div style={{display:"flex", flexDirection:"column", alignItems:"center", gap:8, marginTop:4}}>
+            <div style={{fontSize:12, color:"#888", letterSpacing:2}}>選擇賽制</div>
+            <div style={{display:"flex", gap:12}}>
+              {[{key:"bo1",label:"一局決勝"},{key:"bo3",label:"三局兩勝"}].map(f=>(
+                <button key={f.key} onClick={()=>setFormat(f.key)} style={{
+                  padding:"10px 24px", borderRadius:10, fontSize:13, fontWeight:700,
+                  background: format===f.key ? COLORS[1] : "#f5f5f5",
+                  border:`2px solid ${format===f.key ? COLORS[1] : "#ddd"}`,
+                  color: format===f.key ? "#fff" : "#555", cursor:"pointer",
+                }}>{f.label}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {mode && format && (
           <div style={{display:"flex", gap:28, marginTop:4}}>
             {[0,1].map(i=>(
               <div key={i} style={{display:"flex", flexDirection:"column", gap:8, alignItems:"center"}}>
@@ -272,7 +290,7 @@ export default function Badminton() {
           </div>
         )}
 
-        {mode && (
+        {mode && format && (
           <button onClick={()=>setSetupDone(true)} style={{
             marginTop:8, padding:"12px 40px", borderRadius:10,
             background:"#22c55e", border:"none",
@@ -331,7 +349,14 @@ export default function Badminton() {
           <span style={{fontSize:12, color:"#aaa"}}>第 {curSet+1} 局</span>
         </div>
 
-        <button onClick={()=>{ setSetupDone(false); setScores([[0,0]]); setSetWins([0,0]); setServing(0); setServerIdx([0,0]); setHistory([]); }} style={{
+        {(setWins[0] >= winsNeeded || setWins[1] >= winsNeeded) && (
+          <button onClick={() => setShowMatchEnd(true)} style={{
+            fontSize:11, padding:"4px 12px", borderRadius:6,
+            background:"#1d4ed822", border:"1px solid #1d4ed844",
+            color:"#1d4ed8", cursor:"pointer", marginRight:6,
+          }}>結束比賽</button>
+        )}
+        <button onClick={()=>{ setSetupDone(false); setScores([[0,0]]); setSetWins([0,0]); setServing(0); setServerIdx([0,0]); setHistory([]); setFormat(null); }} style={{
           fontSize:11, padding:"4px 12px", borderRadius:6,
           background:"#f5f5f5", border:"1px solid #ddd",
           color:"#888", cursor:"pointer",
