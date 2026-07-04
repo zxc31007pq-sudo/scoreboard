@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import MatchEndModal from "./MatchEndModal";
 
 const AD_H = 56;
 const WIN_SCORE = 21;
@@ -336,6 +337,15 @@ export default function Badminton() {
         }}>重新設定</button>
       </div>
 
+      {showMatchEnd && (
+        <MatchEndModal
+          sport="badminton" mode={mode === "doubles" ? "雙打" : "單打"}
+          teamA={names[0]} teamB={names[1]}
+          scoreA={setWins[0]} scoreB={setWins[1]}
+          winner={setWins[0] > setWins[1] ? "A" : "B"}
+          onClose={() => setShowMatchEnd(false)}
+        />
+      )}
       {/* Alert */}
       {alert && (
         <div style={{

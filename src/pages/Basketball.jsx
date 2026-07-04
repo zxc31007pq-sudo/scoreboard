@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import MatchEndModal from "./MatchEndModal";
 
 const QUARTERS = ["Q1", "Q2", "Q3", "Q4", "OT"];
 const AD_H = 56;
@@ -273,6 +274,7 @@ export default function Basketball() {
   const [editing, setEditing] = useState(null);
   const [log, setLog] = useState([]);
   const [showTimeout, setShowTimeout] = useState(false);
+  const [showMatchEnd, setShowMatchEnd] = useState(false);
   const [teams, setTeams] = useState([
     {name:"主　隊", score:0, fouls:0, techFouls:0, timeouts:0, history:[]},
     {name:"客　隊", score:0, fouls:0, techFouls:0, timeouts:0, history:[]},
@@ -353,6 +355,15 @@ export default function Basketball() {
       color:"#e0e0e0", display:"flex", flexDirection:"column", overflow:"hidden",
     }}>
       {showTimeout && <TimeoutTimer onClose={()=>setShowTimeout(false)}/>}
+      {showMatchEnd && (
+        <MatchEndModal
+          sport="basketball" mode="5v5"
+          teamA={teams[0].name.trim()} teamB={teams[1].name.trim()}
+          scoreA={teams[0].score} scoreB={teams[1].score}
+          winner={teams[0].score > teams[1].score ? "A" : "B"}
+          onClose={() => setShowMatchEnd(false)}
+        />
+      )}
 
       {/* HEADER */}
       <div style={{
@@ -385,7 +396,11 @@ export default function Basketball() {
             background:"#1a1a1a", border:"1px solid #2a2a2a", color:"#555", cursor:"pointer",
           }}>NEXT →</button>
         </div>
-        <span style={{fontSize:10, color:"#2a2a2a"}}>FREE VERSION</span>
+        <button onClick={() => setShowMatchEnd(true)} style={{
+          padding:"3px 10px", borderRadius:6, fontSize:11, fontWeight:700,
+          background:"#cc000022", border:"1px solid #cc000044",
+          color:"#cc0000", cursor:"pointer",
+        }}>結束比賽</button>
       </div>
 
       {/* MAIN */}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import MatchEndModal from "./MatchEndModal";
 
 const COLORS = ["#cc0000", "#1d4ed8"];
 const LIGHT_BG = ["#fff0f0", "#eef3ff"];
@@ -149,6 +150,7 @@ export default function Basketball3v3() {
   const [scores, setScores] = useState([0, 0]);
   const [history, setHistory] = useState([]);
   const [alert, setAlert] = useState(null);
+  const [showMatchEnd, setShowMatchEnd] = useState(false);
 
   const winner = limit ? calcWinner(scores[0], scores[1], limit) : null;
 
@@ -297,12 +299,26 @@ export default function Basketball3v3() {
           }}>先得 {limit} 分勝</span>
         </div>
 
+        <button onClick={() => setShowMatchEnd(true)} style={{
+          fontSize: 11, padding: "4px 12px", borderRadius: 6,
+          background: "#cc000022", border: "1px solid #cc000044",
+          color: "#cc0000", cursor: "pointer", marginRight: 8,
+        }}>結束比賽</button>
         <button onClick={reset} style={{
           fontSize: 11, padding: "4px 12px", borderRadius: 6,
           background: "#f5f5f5", border: "1px solid #ddd", color: "#888", cursor: "pointer",
         }}>重新設定</button>
       </div>
 
+      {showMatchEnd && (
+        <MatchEndModal
+          sport="basketball" mode="3v3"
+          teamA={names[0]} teamB={names[1]}
+          scoreA={scores[0]} scoreB={scores[1]}
+          winner={scores[0] > scores[1] ? "A" : "B"}
+          onClose={() => setShowMatchEnd(false)}
+        />
+      )}
       {/* Alert */}
       {alert && (
         <div style={{

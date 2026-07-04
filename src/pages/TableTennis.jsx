@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import MatchEndModal from "./MatchEndModal";
 
 const AD_H = 56;
 const WIN_SCORE = 11;
@@ -130,6 +131,7 @@ export default function TableTennis() {
   const [setWins, setSetWins] = useState([0, 0]);
   const [history, setHistory] = useState([]);
   const [alert, setAlert] = useState(null);
+  const [showMatchEnd, setShowMatchEnd] = useState(false);
 
   const curSet = scores.length - 1;
   const [s0, s1] = scores[curSet];
@@ -292,6 +294,11 @@ export default function TableTennis() {
           <span style={{ fontSize: 12, color: "#aaa" }}>第 {curSet + 1} 局</span>
         </div>
 
+        <button onClick={() => setShowMatchEnd(true)} style={{
+          fontSize: 11, padding: "4px 12px", borderRadius: 6,
+          background: "#cc000022", border: "1px solid #cc000044",
+          color: "#cc0000", cursor: "pointer", marginRight: 6,
+        }}>結束比賽</button>
         <button onClick={() => { setSetupDone(false); setScores([[0, 0]]); setSetWins([0, 0]); setHistory([]); setAlert(null); }} style={{
           fontSize: 11, padding: "4px 12px", borderRadius: 6,
           background: "#f5f5f5", border: "1px solid #ddd",
@@ -299,6 +306,15 @@ export default function TableTennis() {
         }}>重新設定</button>
       </div>
 
+      {showMatchEnd && (
+        <MatchEndModal
+          sport="tabletennis" mode="桌球"
+          teamA={names[0]} teamB={names[1]}
+          scoreA={setWins[0]} scoreB={setWins[1]}
+          winner={setWins[0] > setWins[1] ? "A" : "B"}
+          onClose={() => setShowMatchEnd(false)}
+        />
+      )}
       {/* Alert */}
       {alert && (
         <div style={{

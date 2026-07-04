@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import MatchEndModal from "./MatchEndModal";
 
 const AD_H = 56;
 const WIN_SCORE = 11;
@@ -215,6 +216,7 @@ export default function Pickleball() {
   const [firstServe, setFirstServe] = useState(true); // 第一局第一發只有一次發球權
   const [history, setHistory] = useState([]);
   const [alert, setAlert] = useState(null);
+  const [showMatchEnd, setShowMatchEnd] = useState(false);
 
   const curSet = scores.length - 1;
   const [s0, s1] = scores[curSet];
@@ -479,6 +481,15 @@ export default function Pickleball() {
         }}>重新設定</button>
       </div>
 
+      {showMatchEnd && (
+        <MatchEndModal
+          sport="pickleball" mode="匹克球"
+          teamA={names[0]} teamB={names[1]}
+          scoreA={s0} scoreB={s1}
+          winner={s0 > s1 ? "A" : "B"}
+          onClose={() => setShowMatchEnd(false)}
+        />
+      )}
       {/* Alert */}
       {alert && (
         <div style={{
