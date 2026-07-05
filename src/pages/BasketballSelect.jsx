@@ -5,10 +5,10 @@ export default function BasketballSelect() {
 
   return (
     <div style={{
-      height: "100vh", background: "#0a0a0a",
+      height: "100vh", width: "100vw", maxWidth: "100vw", background: "#0a0a0a",
       fontFamily: "'Inter','Helvetica Neue',sans-serif",
       display: "flex", flexDirection: "column",
-      overflow: "hidden",
+      overflowX: "hidden", overflowY: "auto",
     }}>
 
       {/* Header */}
@@ -38,7 +38,7 @@ export default function BasketballSelect() {
 
       {/* Mode cards */}
       <div style={{
-        flex: 1, display: "flex", gap: 20,
+        flex: 1, display: "flex", gap: 20, flexWrap: "wrap", minWidth: 0,
         padding: "0 40px 40px", alignItems: "center", justifyContent: "center",
       }}>
 
@@ -71,7 +71,7 @@ function ModeCard({ label, sub, desc, color, court, onClick }) {
     <div
       onClick={onClick}
       style={{
-        flex: 1, maxWidth: 360,
+        flex: "1 1 260px", minWidth: 0, maxWidth: 360,
         background: "#111", border: `1.5px solid #222`,
         borderRadius: 20, padding: "28px 24px",
         cursor: "pointer", display: "flex", flexDirection: "column", gap: 16,
@@ -91,7 +91,7 @@ function ModeCard({ label, sub, desc, color, court, onClick }) {
         background: "#0a0a0a", borderRadius: 12,
         padding: "20px", display: "flex",
         alignItems: "center", justifyContent: "center",
-        height: 160,
+        height: 160, minWidth: 0, overflow: "hidden",
       }}>
         {court}
       </div>
@@ -138,7 +138,7 @@ function Court5v5() {
   const s = "#1a1a1a"; // stroke
   const a = "#cc000066"; // accent
   return (
-    <svg width="200" height="120" viewBox="0 0 200 120">
+    <svg width="200" height="120" viewBox="0 0 200 120" style={{ width: "100%", height: "auto", maxWidth: 200 }}>
       {/* Court outline */}
       <rect x="4" y="4" width="192" height="112" rx="4" fill="none" stroke={s} strokeWidth="1.5" />
       {/* Center line */}
@@ -173,7 +173,7 @@ function Court3v3() {
   const s = "#1a1a1a";
   const a = "#f9731622";
   return (
-    <svg width="160" height="120" viewBox="0 0 160 120">
+    <svg width="160" height="120" viewBox="0 0 160 120" style={{ width: "100%", height: "auto", maxWidth: 160 }}>
       {/* Half court */}
       <rect x="4" y="4" width="152" height="112" rx="4" fill="none" stroke={s} strokeWidth="1.5" />
       {/* Key */}
