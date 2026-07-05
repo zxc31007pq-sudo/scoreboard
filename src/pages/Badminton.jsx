@@ -46,7 +46,7 @@ function ScoreCard({ score, color, lightBg, serving, name, onScore, onUndo,
 
   return (
     <div style={{
-      flex:1, display:"flex", flexDirection:"column",
+      flex:1, minWidth:0, display:"flex", flexDirection:"column",
       borderRight: side==="left" ? "3px solid #e0e0e0" : "none",
       borderLeft:  side==="right"? "3px solid #e0e0e0" : "none",
     }}>
@@ -123,7 +123,7 @@ function ScoreCard({ score, color, lightBg, serving, name, onScore, onUndo,
       <div style={{
         display:"flex", alignItems:"center", justifyContent:"center",
         gap:12, padding:"10px 16px", background:"#f8f8f8",
-        borderTop:"1px solid #e0e0e0", flexShrink:0,
+        borderTop:"1px solid #e0e0e0", flexShrink:0, flexWrap:"wrap", minWidth:0,
       }}>
         <button
           onPointerDown={()=>setPressed(true)}
@@ -304,9 +304,9 @@ export default function Badminton() {
 
   return (
     <div style={{
-      height:"100vh", background:"#fff",
+      height:"100vh", width:"100vw", maxWidth:"100vw", background:"#fff",
       fontFamily:"'Inter','Helvetica Neue',sans-serif",
-      display:"flex", flexDirection:"column", overflow:"hidden",
+      display:"flex", flexDirection:"column", overflowX:"hidden", overflowY:"hidden",
     }}>
 
       {/* HEADER */}
@@ -383,7 +383,7 @@ export default function Badminton() {
       )}
 
       {/* MAIN — two big score cards */}
-      <div style={{flex:1, display:"flex", minHeight:0}}>
+      <div style={{flex:1, display:"flex", minHeight:0, minWidth:0, overflow:"hidden"}}>
         <ScoreCard
           score={s0} color={COLORS[0]} lightBg={LIGHT_BG[0]}
           serving={serving===0} name={names[0]} side="left"

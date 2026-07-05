@@ -126,7 +126,7 @@ function TeamPanel({ team, idx, poss, onScore, onUndo, onFoul, onFoulSub,
   const active = poss === idx;
   return (
     <div style={{
-      flex:1, display:"flex", flexDirection:"column", gap:9, padding:"10px 14px",
+      flex:1, minWidth:0, display:"flex", flexDirection:"column", gap:9, padding:"10px 14px",
       background: active ? "#0d1a0d" : "#0a0a0a",
       borderRight: isLeft ? "2px solid #1a1a1a" : "none",
       borderLeft:  !isLeft ? "2px solid #1a1a1a" : "none",
@@ -169,7 +169,7 @@ function TeamPanel({ team, idx, poss, onScore, onUndo, onFoul, onFoulSub,
       </div>
 
       {/* Score buttons */}
-      <div style={{display:"flex", gap:8, justifyContent:"center"}}>
+      <div style={{display:"flex", gap:8, justifyContent:"center", flexWrap:"wrap", minWidth:0}}>
         <TBtn label="+1" onClick={()=>onScore(1)} color="#b91c1c" />
         <TBtn label="+2" onClick={()=>onScore(2)} color="#b91c1c" />
         <TBtn label="+3" onClick={()=>onScore(3)} color="#b91c1c" />
@@ -350,9 +350,10 @@ export default function Basketball() {
 
   return (
     <div style={{
-      height:"100vh", background:"#0a0a0a",
+      height:"100vh", width:"100vw", maxWidth:"100vw", background:"#0a0a0a",
       fontFamily:"'Inter','Helvetica Neue',sans-serif",
-      color:"#e0e0e0", display:"flex", flexDirection:"column", overflow:"hidden",
+      color:"#e0e0e0", display:"flex", flexDirection:"column",
+      overflowX:"hidden", overflowY:"hidden",
     }}>
       {showTimeout && <TimeoutTimer onClose={()=>setShowTimeout(false)}/>}
       {showMatchEnd && (
@@ -370,9 +371,9 @@ export default function Basketball() {
         height:HDR_H, flexShrink:0, background:"#0d0d0d",
         borderBottom:"1px solid #1a1a1a",
         display:"flex", alignItems:"center", justifyContent:"space-between",
-        padding:"0 16px",
+        padding:"0 16px", overflow:"hidden", minWidth:0,
       }}>
-        <div style={{display:"flex", alignItems:"center", gap:12}}>
+        <div style={{display:"flex", alignItems:"center", gap:12, flexShrink:0}}>
           <button onClick={()=>navigate("/")} style={{
             padding:"3px 10px", borderRadius:6, fontSize:11, fontWeight:700,
             background:"#1a1a1a", border:"1px solid #2a2a2a",
@@ -381,7 +382,7 @@ export default function Basketball() {
           <span style={{fontSize:22}}>🏀</span>
           <span style={{fontSize:13, fontWeight:800, letterSpacing:3, color:"#cc0000"}}>SCOREBOARD</span>
         </div>
-        <div style={{display:"flex", gap:6, alignItems:"center"}}>
+        <div style={{display:"flex", gap:6, alignItems:"center", flexWrap:"wrap", minWidth:0, justifyContent:"center"}}>
           {QUARTERS.map((q,i)=>(
             <button key={q} onClick={()=>setQ(i)} style={{
               padding:"4px 16px", borderRadius:20, fontSize:15, fontWeight:800,
@@ -404,7 +405,7 @@ export default function Basketball() {
       </div>
 
       {/* MAIN */}
-      <div style={{flex:1, display:"flex", minHeight:0}}>
+      <div style={{flex:1, display:"flex", minHeight:0, minWidth:0, overflow:"hidden"}}>
 
         <TeamPanel team={teams[0]} idx={0} poss={poss}
           onScore={p=>score(0,p)} onUndo={()=>undo(0)}
