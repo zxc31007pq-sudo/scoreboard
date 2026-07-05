@@ -1,6 +1,19 @@
-import { collection, addDoc, getDoc, getDocs, doc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, getDoc, getDocs, doc, updateDoc, deleteDoc, setDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
-import { getRankData, applyMatchResult, saveRankData } from "./rankService";
+import { getRankData, applyMatchResult, saveRankData, getSeasonKey } from "./rankService";
+
+const FREE_DELETE_LIMIT = 3;
+const PRO_DELETE_LIMIT = 10; // 付費版功能,待 PRO 判斷邏輯上線後啟用
+
+// 依球類模式判斷每隊最多可被認領的人數上限,防止同一場比賽被無限重複認領盜刷積分
+function getMaxClaimsForMode(sport, mode) {
+  if (sport === "basketball" && mode === "5v5") return 5;
+  if (sport === "basketball" && mode === "3v3") return 3;
+  if (mode === "雙打") return 2;
+  if (mode === "單打") return 1;
+  if (sport === "tabletennis") return 1; // 桌球僅單打
+  return 5; // 未知模式時的保守預設值,避免誤擋合理使用情境
+}
 
 // 產生比賽紀錄並存入 Firestore
 export async function createMatch({ sport, mode, teamA, teamB, scoreA, scoreB, winner }) {
@@ -14,7 +27,9 @@ export async function createMatch({ sport, mode, teamA, teamB, scoreA, scoreB, w
     scoreA,       // 隊伍A分數
     scoreB,       // 隊伍B分數
     winner,       // "A" | "B"
-    claimedBy: [], // 已認領的 uid 列表
+    claimedBy: [],  // 已認領的 uid 列表(所有隊伍合併,用於防止同一人重複認領)
+    claimsA: [],    // A隊已認領的 uid 列表(用於人數上限檢查)
+    claimsB: [],    // B隊已認領的 uid 列表(用於人數上限檢查)
     createdAt: serverTimestamp(),
     expiresAt,
     status: "active",
@@ -46,6 +61,13 @@ export async function claimMatch(matchId, uid, { name, side }) {
 
   // 檢查是否已認領
   if (match.claimedBy?.includes(uid)) throw new Error("你已經認領過這場比賽");
+
+  // 檢查該隊認領人數是否已達上限(防止同一場比賽被無限重複認領)
+  const maxClaims = getMaxClaimsForMode(match.sport, match.mode);
+  const sideClaims = side === "A" ? (match.claimsA || []) : (match.claimsB || []);
+  if (sideClaims.length >= maxClaims) {
+    throw new Error(`此隊認領人數已達上限（${maxClaims}人），可能隊友已經認領過了`);
+  }
 
   const isWinner = match.winner === side;
   const score = side === "A"
@@ -85,9 +107,10 @@ export async function claimMatch(matchId, uid, { name, side }) {
     expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // PRO: 30天, 免費: 14天
   });
 
-  // 標記已認領
+  // 標記已認領(同時記錄到對應隊伍的 claims 陣列,供人數上限檢查用)
   await updateDoc(matchRef, {
     claimedBy: arrayUnion(uid),
+    [side === "A" ? "claimsA" : "claimsB"]: arrayUnion(uid),
   });
 
   return {
@@ -177,3 +200,68 @@ export async function updateClaimSide(matchId, uid, newSide) {
     rank: newRankResult.rankKey,
   };
 }
+
+// 查詢目前的刪除額度使用狀況(自動處理跨季重置)
+export async function getDeleteQuotaStatus(uid) {
+  const userRef = doc(db, "users", uid);
+  const snap = await getDoc(userRef);
+  const profile = snap.exists() ? snap.data() : {};
+  const currentSeason = getSeasonKey();
+  const quota = profile.deleteQuota || {};
+  const used = quota.seasonKey === currentSeason ? (quota.used || 0) : 0;
+  const limit = profile.plan === "pro" ? PRO_DELETE_LIMIT : FREE_DELETE_LIMIT;
+  return { used, limit, remaining: Math.max(0, limit - used), seasonKey: currentSeason };
+}
+
+// 刪除比賽紀錄
+// 限制:
+// 1. 每季有刪除次數上限(免費版3次,PRO版10次,額度隨段位季度重置一起重置)
+// 2. 只能刪除該球類模式「目前最新一筆」紀錄,並會正確回溯扣回積分/連勝
+//    (若不是最新一筆,代表之後又有新比賽,回溯會算錯,直接擋下)
+export async function deleteRecord(uid, recordId) {
+  const recordRef = doc(db, "users", uid, "records", recordId);
+  const recordSnap = await getDoc(recordRef);
+  if (!recordSnap.exists()) throw new Error("找不到此比賽紀錄");
+  const record = recordSnap.data();
+
+  // 舊資料相容:段位系統上線前的紀錄沒有快照,無法安全回溯積分,不允許刪除
+  if (!record.rankBefore || !record.rankAfter) {
+    throw new Error("此紀錄為系統升級前的舊資料，暫不支援刪除");
+  }
+
+  // 額度檢查
+  const userRef = doc(db, "users", uid);
+  const userSnap = await getDoc(userRef);
+  const profile = userSnap.exists() ? userSnap.data() : {};
+  const currentSeason = getSeasonKey();
+  const quota = profile.deleteQuota || {};
+  const usedSoFar = quota.seasonKey === currentSeason ? (quota.used || 0) : 0;
+  const limit = profile.plan === "pro" ? PRO_DELETE_LIMIT : FREE_DELETE_LIMIT;
+  if (usedSoFar >= limit) {
+    throw new Error(`本季刪除次數已達上限（${limit}次），如需更多刪除次數請升級 PRO 版`);
+  }
+
+  // 安全檢查:必須是該模式目前最新一筆紀錄,才能安全回溯積分
+  const rankNow = await getRankData(uid, record.sport, record.mode);
+  const isLatest =
+    rankNow.pts === record.rankAfter.pts &&
+    rankNow.streak === record.rankAfter.streak;
+  if (!isLatest) {
+    throw new Error("只能刪除此模式最新一筆紀錄，請先刪除較新的紀錄");
+  }
+
+  // 回溯積分/連勝到刪除前的狀態
+  await saveRankData(uid, record.sport, record.mode, { ...record.rankBefore });
+
+  // 刪除紀錄本身
+  await deleteDoc(recordRef);
+
+  // 更新本季刪除額度(注意:不會把 uid 從 match 的 claimedBy/claimsA/claimsB 移除,
+  // 避免刪除後又能重新認領同一場比賽,重複賺取積分)
+  await setDoc(userRef, {
+    deleteQuota: { used: usedSoFar + 1, seasonKey: currentSeason },
+  }, { merge: true });
+
+  return { remaining: limit - (usedSoFar + 1), limit };
+}
+

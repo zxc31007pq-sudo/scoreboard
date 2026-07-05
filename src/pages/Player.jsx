@@ -32,6 +32,7 @@ export default function Player() {
   const [loading, setLoading] = useState(true);
   const [records, setRecords] = useState([]);
   const [rankData, setRankData] = useState([]); // users/{uid}/ranks 子集合資料
+  const [deleteQuota, setDeleteQuota] = useState({ used: 0, limit: 3, remaining: 3 });
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState("");
   const [showShareCard, setShowShareCard] = useState(false);
@@ -54,6 +55,11 @@ export default function Player() {
           // 讀取段位資料（各球類模式獨立計算，會自動偵測跨季並重置）
           const ranks = await getAllRankData(u.uid);
           setRankData(ranks);
+
+          // 讀取本季刪除額度使用狀況
+          const { getDeleteQuotaStatus } = await import("../matchService");
+          const quota = await getDeleteQuotaStatus(u.uid);
+          setDeleteQuota(quota);
         } catch (e) {
           console.error("Profile load error:", e);
         }
@@ -136,8 +142,8 @@ export default function Player() {
       )}
       {/* Content */}
       <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
-        {tab === "home"    && <HomeTab user={user} profile={profile} displayName={displayName} records={records} rankData={rankData} navigate={navigate} editingName={editingName} setEditingName={setEditingName} nameInput={nameInput} setNameInput={setNameInput} onSaveName={handleSaveName} onShareCard={() => setShowShareCard(true)} />}
-        {tab === "records" && <RecordsTab user={user} records={records} navigate={navigate} />}
+        {tab === "home"    && <HomeTab user={user} profile={profile} displayName={displayName} records={records} rankData={rankData} deleteQuota={deleteQuota} navigate={navigate} editingName={editingName} setEditingName={setEditingName} nameInput={nameInput} setNameInput={setNameInput} onSaveName={handleSaveName} onShareCard={() => setShowShareCard(true)} />}
+        {tab === "records" && <RecordsTab user={user} records={records} deleteQuota={deleteQuota} navigate={navigate} />}
         {tab === "rank"    && <RankTab user={user} rankData={rankData} navigate={navigate} />}
         {tab === "profile" && <ProfileTab user={user} profile={profile} displayName={displayName} onSignOut={handleSignOut} navigate={navigate} />}
       </div>
@@ -168,7 +174,7 @@ const SPORT_LABELS = { basketball:"籃球", badminton:"羽球", tabletennis:"桌
 
 
 // ── Home Tab ──
-function HomeTab({ user, profile, displayName, records, rankData, navigate, editingName, setEditingName, nameInput, setNameInput, onSaveName, onShareCard }) {
+function HomeTab({ user, profile, displayName, records, rankData, deleteQuota, navigate, editingName, setEditingName, nameInput, setNameInput, onSaveName, onShareCard }) {
   const [statFilter, setStatFilter] = useState("全部");
   const sportMap = { "全部": null, "籃球": "basketball", "羽球": "badminton", "匹克球": "pickleball", "桌球": "tabletennis" };
   const filteredRecords = statFilter === "全部" ? records : records.filter(r => r.sport === sportMap[statFilter]);
@@ -323,7 +329,7 @@ function HomeTab({ user, profile, displayName, records, rankData, navigate, edit
         <div>
           <div style={{ fontSize: 11, color: "#444", letterSpacing: 2, marginBottom: 10 }}>最近比賽</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {records.slice(0,3).map(r => <RecordRow key={r.id} record={r} user={user} onUpdate={() => window.location.reload()} />)}
+            {records.slice(0,3).map(r => <RecordRow key={r.id} record={r} user={user} deleteQuota={deleteQuota} onUpdate={() => window.location.reload()} />)}
           </div>
         </div>
       )}
@@ -332,10 +338,13 @@ function HomeTab({ user, profile, displayName, records, rankData, navigate, edit
 }
 
 // ── Record Row ──
-function RecordRow({ record, user, onUpdate }) {
+function RecordRow({ record, user, deleteQuota, onUpdate }) {
   const [editing, setEditing] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [editError, setEditError] = useState("");
+  const [showDeleteInfo, setShowDeleteInfo] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   const icon = { basketball:"🏀", badminton:"🏸", tabletennis:"🏓", pickleball:"🥒" }[record.sport] || "🏅";
   const date = record.createdAt?.toDate ? record.createdAt.toDate().toLocaleDateString("zh-TW") : "";
@@ -343,6 +352,10 @@ function RecordRow({ record, user, onUpdate }) {
   // Check if within 3 hours (editable)
   const createdAt = record.createdAt?.toDate ? record.createdAt.toDate() : new Date(record.createdAt);
   const editable = record.matchId && (new Date() - createdAt) < 3 * 60 * 60 * 1000;
+
+  // 只有段位系統上線後的新格式紀錄(有 rankBefore/rankAfter 快照)才支援刪除
+  const deletable = !!(record.rankBefore && record.rankAfter);
+  const quotaExhausted = deleteQuota && deleteQuota.remaining <= 0;
 
   const handleUpdate = async (newSide) => {
     setUpdating(true);
@@ -356,6 +369,19 @@ function RecordRow({ record, user, onUpdate }) {
       setEditError(e.message);
     }
     setUpdating(false);
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      const { deleteRecord } = await import("../matchService");
+      await deleteRecord(user.uid, record.id);
+      onUpdate && onUpdate();
+    } catch (e) {
+      setDeleteError(e.message);
+      setDeleting(false);
+    }
   };
 
   return (
@@ -379,13 +405,22 @@ function RecordRow({ record, user, onUpdate }) {
           </div>
           <div style={{ fontSize: 10, color: "#555", marginTop: 2 }}>+{record.pts} 積分</div>
         </div>
-        {editable && (
-          <button onClick={() => setEditing(!editing)} style={{
-            padding: "3px 8px", borderRadius: 6, fontSize: 10, fontWeight: 700,
-            background: "#1a1a1a", border: "1px solid #2a2a2a",
-            color: "#555", cursor: "pointer", flexShrink: 0,
-          }}>修改</button>
-        )}
+        <div style={{ display: "flex", flexDirection: "column", gap: 4, flexShrink: 0 }}>
+          {editable && (
+            <button onClick={() => setEditing(!editing)} style={{
+              padding: "3px 8px", borderRadius: 6, fontSize: 10, fontWeight: 700,
+              background: "#1a1a1a", border: "1px solid #2a2a2a",
+              color: "#555", cursor: "pointer",
+            }}>修改</button>
+          )}
+          {deletable && (
+            <button onClick={() => setShowDeleteInfo(true)} style={{
+              padding: "3px 8px", borderRadius: 6, fontSize: 10, fontWeight: 700,
+              background: "#1a1a1a", border: "1px solid #2a2a2a",
+              color: "#ef4444", cursor: "pointer",
+            }}>刪除</button>
+          )}
+        </div>
       </div>
 
       {editing && (
@@ -407,12 +442,70 @@ function RecordRow({ record, user, onUpdate }) {
           {editError && <div style={{ fontSize: 11, color: "#f87171", marginTop: 6 }}>{editError}</div>}
         </div>
       )}
+
+      {/* 刪除說明 + 確認彈窗 */}
+      {showDeleteInfo && (
+        <div style={{
+          position: "fixed", inset: 0, background: "#000000cc",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 250, padding: 16,
+        }}>
+          <div style={{
+            width: "100%", maxWidth: 360,
+            background: "#111", border: "1px solid #1e1e1e",
+            borderRadius: 20, padding: "24px 20px",
+            display: "flex", flexDirection: "column", gap: 14,
+          }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>🗑️</div>
+              <div style={{ fontSize: 15, fontWeight: 900, color: "#f0f0f0", marginBottom: 6 }}>確認刪除這場紀錄？</div>
+            </div>
+
+            <div style={{
+              background: "#0a0a0a", borderRadius: 10, padding: "12px 14px",
+              fontSize: 11, color: "#888", lineHeight: 1.8,
+            }}>
+              • 免費版每季（1/4/7/10月）最多可刪除 <strong style={{ color: "#f0f0f0" }}>{deleteQuota?.limit ?? 3} 場</strong>，本季已使用 <strong style={{ color: "#f0f0f0" }}>{deleteQuota?.used ?? 0}/{deleteQuota?.limit ?? 3}</strong><br/>
+              • 只能刪除該模式「最新一筆」紀錄，積分與連勝會正確扣回<br/>
+              • 刪除後無法復原，且無法再次認領同一場比賽
+            </div>
+
+            {quotaExhausted && (
+              <div style={{
+                background: "#ef444418", border: "1px solid #ef444444",
+                borderRadius: 8, padding: "8px 12px", fontSize: 12, color: "#f87171", textAlign: "center",
+              }}>本季刪除額度已用完</div>
+            )}
+
+            {deleteError && (
+              <div style={{
+                background: "#ef444418", border: "1px solid #ef444444",
+                borderRadius: 8, padding: "8px 12px", fontSize: 12, color: "#f87171", textAlign: "center",
+              }}>{deleteError}</div>
+            )}
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => { setShowDeleteInfo(false); setDeleteError(""); }} disabled={deleting} style={{
+                flex: 1, padding: "11px 0", borderRadius: 10,
+                background: "#1a1a1a", border: "1px solid #2a2a2a",
+                color: "#555", fontSize: 13, cursor: "pointer",
+              }}>取消</button>
+              <button onClick={handleDelete} disabled={deleting || quotaExhausted} style={{
+                flex: 1, padding: "11px 0", borderRadius: 10,
+                background: deleting || quotaExhausted ? "#333" : "#ef4444",
+                border: "none", color: "#fff", fontSize: 13, fontWeight: 800,
+                cursor: deleting || quotaExhausted ? "not-allowed" : "pointer",
+              }}>{deleting ? "刪除中..." : "確認刪除"}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 // ── Records Tab ──
-function RecordsTab({ user, records, navigate }) {
+function RecordsTab({ user, records, deleteQuota, navigate }) {
   const [filter, setFilter] = useState("全部");
   const filters = ["全部", "籃球", "羽球", "桌球", "匹克球"];
   const sportMap = { "籃球":"basketball", "羽球":"badminton", "桌球":"tabletennis", "匹克球":"pickleball" };
@@ -433,6 +526,16 @@ function RecordsTab({ user, records, navigate }) {
 
   return (
     <div style={{ padding: 16 }}>
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        background: "#111", border: "1px solid #1e1e1e", borderRadius: 10,
+        padding: "8px 14px", marginBottom: 12, fontSize: 11, color: "#555",
+      }}>
+        <span>本季刪除額度</span>
+        <span style={{ color: (deleteQuota?.remaining ?? 3) <= 0 ? "#ef4444" : "#f0f0f0", fontWeight: 700 }}>
+          {deleteQuota?.used ?? 0} / {deleteQuota?.limit ?? 3}
+        </span>
+      </div>
       <div style={{ display: "flex", gap: 6, marginBottom: 14, overflowX: "auto", paddingBottom: 4 }}>
         {filters.map(f => (
           <button key={f} onClick={() => setFilter(f)} style={{
@@ -451,7 +554,7 @@ function RecordsTab({ user, records, navigate }) {
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {filtered.map(r => <RecordRow key={r.id} record={r} user={user} onUpdate={() => window.location.reload()} />)}
+          {filtered.map(r => <RecordRow key={r.id} record={r} user={user} deleteQuota={deleteQuota} onUpdate={() => window.location.reload()} />)}
         </div>
       )}
     </div>
@@ -459,7 +562,7 @@ function RecordsTab({ user, records, navigate }) {
 }
 
 // ── Rank Tab ──
-// 段位資料現在來自 users/{uid}/ranks 子集合（各球類模式獨立累積,含連勝加成),
+// 段位資料現在來自 users/{uid}/ranks 子集合（各球類模式獨立累積，含連勝加成），
 // 不再從 records 即時加總計算。
 function RankTab({ user, rankData, navigate }) {
   if (!user) {
