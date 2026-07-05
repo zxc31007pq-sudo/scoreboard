@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged, signOut, deleteUser, reauthenticateWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { doc, getDoc, collection, query, orderBy, limit, getDocs, deleteDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
-import { RANK_SYSTEM, getRank } from "../rankService";
+import { RANK_SYSTEM, getRank, getAllRankData, getNextResetInfo } from "../rankService";
 import ShareCardModal from "./ShareCardModal";
 
 function Avatar({ name, size = 56 }) {
@@ -51,9 +51,9 @@ export default function Player() {
           );
           setRecords(rSnap.docs.map(d => ({ id: d.id, ...d.data() })));
 
-          // 讀取段位資料（各球類模式獨立計算）
-          const rankSnap = await getDocs(collection(db, "users", u.uid, "ranks"));
-          setRankData(rankSnap.docs.map(d => ({ modeKey: d.id, ...d.data() })));
+          // 讀取段位資料（各球類模式獨立計算，會自動偵測跨季並重置）
+          const ranks = await getAllRankData(u.uid);
+          setRankData(ranks);
         } catch (e) {
           console.error("Profile load error:", e);
         }
@@ -541,7 +541,12 @@ function RankTab({ user, rankData, navigate }) {
         background: "#111", border: "1px solid #1e1e1e", borderRadius: 12,
         padding: "12px 16px", textAlign: "center",
       }}>
-        <div style={{ fontSize: 11, color: "#555" }}>本季結束於 <span style={{ color: "#f0f0f0", fontWeight: 700 }}>2026/09/30</span></div>
+        <div style={{ fontSize: 11, color: "#555" }}>本季結束於 <span style={{ color: "#f0f0f0", fontWeight: 700 }}>{
+          (() => {
+            const { seasonEndDate } = getNextResetInfo();
+            return `${seasonEndDate.getFullYear()}/${String(seasonEndDate.getMonth()+1).padStart(2,"0")}/${String(seasonEndDate.getDate()).padStart(2,"0")}`;
+          })()
+        }</span></div>
         <div style={{ fontSize: 10, color: "#333", marginTop: 4 }}>季末重置，歷史最高段位永久保留</div>
       </div>
     </div>

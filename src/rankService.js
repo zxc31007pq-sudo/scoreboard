@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, getDocs, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 
 export const RANK_SYSTEM = [
@@ -24,19 +24,119 @@ export function modeKey(sport, mode) {
   return `${sport}_${mode}`;
 }
 
-// 讀取該球員在該球類模式下目前的段位資料
+// ── 季度重置相關 ──
+// 重置月份：1 / 4 / 7 / 10 月。回傳目前所屬「季度區間」的識別字串，例如 "2026-07"
+export function getSeasonKey(date = new Date()) {
+  const month = date.getMonth() + 1; // 1-12
+  const year = date.getFullYear();
+  const quarterStart = month >= 10 ? 10 : month >= 7 ? 7 : month >= 4 ? 4 : 1;
+  return `${year}-${String(quarterStart).padStart(2, "0")}`;
+}
+
+// 回傳下一次重置的日期,以及本季結束日期(下次重置日期的前一天),供畫面顯示用
+export function getNextResetInfo(date = new Date()) {
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  let nextMonth, nextYear;
+  if (month < 4)       { nextMonth = 4;  nextYear = year; }
+  else if (month < 7)  { nextMonth = 7;  nextYear = year; }
+  else if (month < 10) { nextMonth = 10; nextYear = year; }
+  else                 { nextMonth = 1;  nextYear = year + 1; }
+
+  const resetDate = new Date(nextYear, nextMonth - 1, 1);
+  const seasonEndDate = new Date(resetDate.getTime() - 24 * 60 * 60 * 1000);
+  return { resetDate, seasonEndDate };
+}
+
+// 套用季度重置規則到單一筆段位資料上,回傳重置後的資料(不寫入 Firestore)
+// 規則:新手 → 歸0；銅牌以上 → 歸10,回銅牌；連勝歸0；歷史最高段位永久保留
+function applySeasonReset(data) {
+  const wasNewbie = (data.rankKey || "newbie") === "newbie";
+  return {
+    pts: wasNewbie ? 0 : 10,
+    streak: 0,
+    rankKey: wasNewbie ? "newbie" : "bronze",
+    highestRankKey: data.highestRankKey || (wasNewbie ? "newbie" : "bronze"), // 永久保留
+    lastResetPeriod: getSeasonKey(),
+  };
+}
+
+// 讀取該球員在該球類模式下目前的段位資料(自動處理跨季重置)
 export async function getRankData(uid, sport, mode) {
   const ref = doc(db, "users", uid, "ranks", modeKey(sport, mode));
   const snap = await getDoc(ref);
+  const currentSeason = getSeasonKey();
+
   if (!snap.exists()) {
-    return { pts: 0, streak: 0, rankKey: "newbie", highestRankKey: "newbie" };
+    return { pts: 0, streak: 0, rankKey: "newbie", highestRankKey: "newbie", lastResetPeriod: currentSeason };
   }
-  return snap.data();
+
+  const data = snap.data();
+
+  // 舊資料沒有 lastResetPeriod 欄位:視為「剛升級的新功能」,先蓋上目前季度戳記,不執行重置
+  // (避免功能上線當下,誤把使用者當季正在使用的資料判定為跨季而重置)
+  if (!data.lastResetPeriod) {
+    const stamped = { ...data, lastResetPeriod: currentSeason };
+    await setDoc(ref, { lastResetPeriod: currentSeason }, { merge: true });
+    return stamped;
+  }
+
+  // 已跨季:套用重置規則並寫回
+  if (data.lastResetPeriod !== currentSeason) {
+    const resetData = applySeasonReset(data);
+    await setDoc(ref, {
+      pts: resetData.pts,
+      streak: resetData.streak,
+      rankKey: resetData.rankKey,
+      highestRankKey: resetData.highestRankKey,
+      lastResetPeriod: resetData.lastResetPeriod,
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+    return resetData;
+  }
+
+  // 同一季度內,直接回傳
+  return data;
+}
+
+// 讀取該球員「所有球類模式」的段位資料,同樣會自動處理跨季重置(用於段位分頁整體顯示)
+export async function getAllRankData(uid) {
+  const colRef = collection(db, "users", uid, "ranks");
+  const snap = await getDocs(colRef);
+  const currentSeason = getSeasonKey();
+  const results = [];
+
+  for (const d of snap.docs) {
+    const data = d.data();
+    const key = d.id;
+
+    if (!data.lastResetPeriod) {
+      await setDoc(d.ref, { lastResetPeriod: currentSeason }, { merge: true });
+      results.push({ modeKey: key, ...data, lastResetPeriod: currentSeason });
+      continue;
+    }
+
+    if (data.lastResetPeriod !== currentSeason) {
+      const resetData = applySeasonReset(data);
+      await setDoc(d.ref, {
+        pts: resetData.pts,
+        streak: resetData.streak,
+        rankKey: resetData.rankKey,
+        highestRankKey: resetData.highestRankKey,
+        lastResetPeriod: resetData.lastResetPeriod,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+      results.push({ modeKey: key, ...resetData });
+    } else {
+      results.push({ modeKey: key, ...data });
+    }
+  }
+
+  return results;
 }
 
 // 套用一場比賽結果，回傳更新後的段位資料（尚未寫入 Firestore）
-// current: { pts, streak, highestRankKey }
-// isWinner: boolean
+// current: { pts, streak, rankKey, highestRankKey }
 export function applyMatchResult(current, isWinner) {
   const { pts = 0, streak = 0, highestRankKey = "newbie" } = current;
 
@@ -49,7 +149,7 @@ export function applyMatchResult(current, isWinner) {
     else if (newStreak >= 3) multiplier = 1.5;
     earned = Math.round(10 * multiplier);
   } else {
-    newStreak = 0; // 連勝中斷，重新計算
+    newStreak = 0;
     earned = 3;
   }
 
@@ -75,6 +175,7 @@ export async function saveRankData(uid, sport, mode, data) {
     streak: data.streak,
     rankKey: data.rankKey,
     highestRankKey: data.highestRankKey,
+    lastResetPeriod: data.lastResetPeriod || getSeasonKey(),
     updatedAt: serverTimestamp(),
   }, { merge: true });
 }
