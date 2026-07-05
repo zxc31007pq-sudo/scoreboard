@@ -167,22 +167,6 @@ export default function MatchEndModal({ sport, mode, teamA, teamB, scoreA, score
               {copied ? "✓ 已複製連結" : "複製分享連結"}
             </button>
 
-            {/* Share to Line */}
-            <a
-              href={`https://line.me/R/msg/text/?${encodeURIComponent(`📲 認領比賽結果！\n${teamA} ${scoreA}:${scoreB} ${teamB}\n${claimUrl}`)}`}
-              target="_blank" rel="noreferrer"
-              style={{
-                width: "100%", padding: "11px 0", borderRadius: 10,
-                background: "#06C755", border: "none",
-                color: "#fff", fontSize: 13, fontWeight: 700,
-                cursor: "pointer", textDecoration: "none",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                boxSizing: "border-box",
-              }}
-            >
-              分享到 LINE
-            </a>
-
             <button onClick={onClose} style={{
               width: "100%", padding: "8px 0", borderRadius: 10,
               background: "none", border: "1px solid #1e1e1e",

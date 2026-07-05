@@ -219,7 +219,7 @@ export default function ClaimMatch() {
                     <div style={{ fontSize: 12, color: "#555", marginBottom: 10 }}>
                       需要登入才能認領比賽
                     </div>
-                    <button onClick={() => navigate(`/auth`)} style={{
+                    <button onClick={() => navigate(`/auth?redirect=/claim/${matchId}`)} style={{
                       width: "100%", padding: "12px 0", borderRadius: 10,
                       background: "#cc0000", border: "none",
                       color: "#fff", fontSize: 14, fontWeight: 800, cursor: "pointer",

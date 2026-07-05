@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   GoogleAuthProvider,
   signInWithPopup,
@@ -26,6 +26,8 @@ async function createUserProfile(user) {
 
 export default function Auth() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/player";
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const isLineBrowser = /Line/i.test(navigator.userAgent);
@@ -36,7 +38,7 @@ export default function Auth() {
       .then(async (cred) => {
         if (cred) {
           await createUserProfile(cred.user);
-          navigate("/player");
+          navigate(redirectTo);
         }
       })
       .catch(() => {})
@@ -51,7 +53,7 @@ export default function Auth() {
       setLoading(true);
       const cred = await signInWithPopup(auth, provider);
       await createUserProfile(cred.user);
-      navigate("/player");
+      navigate(redirectTo);
     } catch (e) {
       if (
         e.code === "auth/popup-blocked" ||
