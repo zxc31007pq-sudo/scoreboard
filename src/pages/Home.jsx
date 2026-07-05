@@ -42,20 +42,6 @@ function SportCard({ sport, onClick }) {
   );
 }
 
-function ComingSoonCard() {
-  return (
-    <div style={{
-      border: "1.5px dashed #1e1e1e", borderRadius: 16, padding: "20px",
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      gap: 10, minHeight: 180,
-    }}>
-      <div style={{ fontSize: 26, color: "#2a2a2a" }}>⋯</div>
-      <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 2, color: "#383838" }}>陸續推出</div>
-      <div style={{ fontSize: 11, color: "#2a2a2a", textAlign: "center", lineHeight: 1.8 }}>排球・足球<br/>網球</div>
-    </div>
-  );
-}
-
 export default function Homepage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState("scoreboard"); // "scoreboard" | "player"
@@ -119,11 +105,11 @@ export default function Homepage() {
           fontSize: "clamp(28px, 5vw, 52px)", fontWeight: 900, lineHeight: 1.1,
           color: "#f5f5f5", margin: "0 0 14px", letterSpacing: -1,
         }}>
-          選一項運動，<br/>
-          <span style={{ color: "#cc0000" }}>立刻開始計分</span>
+          每一場對決，都值得被記錄。<br/>
+          <span style={{ color: "#cc0000" }}>現在就揪朋友，開始比賽！</span>
         </h1>
         <p style={{ fontSize: 14, color: "#555", margin: 0, maxWidth: 400, lineHeight: 1.7 }}>
-          專為現場裁判設計。計分、計時、犯規記錄一次到位，不用安裝 app。
+          認領比賽，建立個人戰績、勝率與歷史紀錄。
         </p>
       </div>
 
@@ -137,7 +123,6 @@ export default function Homepage() {
           <SportCard key={sport.id} sport={sport}
             onClick={() => navigate(sport.id === "basketball" ? "/basketball-select" : `/${sport.id}`)} />
         ))}
-        <ComingSoonCard />
       </div>
 
       {/* Player version banner */}
