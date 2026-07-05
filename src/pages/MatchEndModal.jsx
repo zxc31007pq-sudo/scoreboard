@@ -5,7 +5,8 @@ import { createMatch } from "../matchService";
 // QR Code 用 qrcode.react 套件
 // 需要安裝: npm install qrcode.react
 
-const BASE_URL = "https://scoreboard-neon-nine.vercel.app";
+// 自動偵測目前網域(dev預覽/正式版/本機皆適用),不再寫死正式版網址
+const BASE_URL = window.location.origin;
 
 export default function MatchEndModal({ sport, mode, teamA, teamB, scoreA, scoreB, winner, onClose }) {
   const [step, setStep] = useState("end"); // "end" | "qr" | "loading"

@@ -3,7 +3,9 @@ import StatsCard from "./StatsCard";
 
 const SPORT_LABELS = { basketball:"籃球", badminton:"羽球", tabletennis:"桌球", pickleball:"匹克球" };
 const SPORT_ICONS  = { basketball:"🏀", badminton:"🏸", tabletennis:"🏓", pickleball:"🥒" };
-const BASE_URL = "https://scoreboard-neon-nine.vercel.app";
+
+// 自動偵測目前網域(dev預覽/正式版/本機皆適用),不再寫死正式版網址
+const BASE_URL = window.location.origin;
 
 export default function ShareCardModal({ user, records, displayName, onClose }) {
   const [step, setStep] = useState(1); // 1=選球類 2=預覽分享
