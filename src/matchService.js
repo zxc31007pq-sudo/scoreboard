@@ -7,7 +7,7 @@ const PRO_DELETE_LIMIT = 10; // 付費版功能,待 PRO 判斷邏輯上線後啟
 
 // 依球類模式判斷每隊最多可被認領的人數上限,防止同一場比賽被無限重複認領盜刷積分
 function getMaxClaimsForMode(sport, mode) {
-  if (sport === "basketball" && mode === "5v5") return 5;
+  if (sport === "basketball" && mode === "5v5") return Infinity; // 有換人制度,不限制人數
   if (sport === "basketball" && mode === "3v3") return 3;
   if (mode === "雙打") return 2;
   if (mode === "單打") return 1;
