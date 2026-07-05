@@ -490,7 +490,7 @@ export default function Pickleball() {
 
       {showMatchEnd && (
         <MatchEndModal
-          sport="pickleball" mode="匹克球"
+          sport="pickleball" mode={mode === "doubles" ? "雙打" : "單打"}
           teamA={names[0]} teamB={names[1]}
           scoreA={s0} scoreB={s1}
           winner={s0 > s1 ? "A" : "B"}

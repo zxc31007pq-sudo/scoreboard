@@ -475,6 +475,8 @@ function RankTab({ user, rankData, navigate }) {
     );
   }
 
+  // 注意：此對照表的 key 必須跟各計分板實際傳給 MatchEndModal 的 mode 值完全一致
+  // (籃球/羽球已依單打雙打/5v5/3v3分開,匹克球已修正為單打/雙打分開;桌球目前僅單打無雙打模式)
   const MODE_LABELS = {
     basketball_5v5:    { label: "籃球",   mode: "5v5" },
     basketball_3v3:    { label: "籃球",   mode: "3v3" },
@@ -482,7 +484,8 @@ function RankTab({ user, rankData, navigate }) {
     badminton_雙打:     { label: "羽球",   mode: "雙打" },
     pickleball_單打:    { label: "匹克球", mode: "單打" },
     pickleball_雙打:    { label: "匹克球", mode: "雙打" },
-    tabletennis_單打:   { label: "桌球",   mode: "單打" },
+    pickleball_匹克球:  { label: "匹克球", mode: "舊資料(修正前)" },
+    tabletennis_桌球:   { label: "桌球",   mode: "桌球" },
   };
 
   // 顯示所有已知模式，沒打過的顯示 0 分新手
