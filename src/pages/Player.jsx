@@ -3,27 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged, signOut, deleteUser, reauthenticateWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { doc, getDoc, collection, query, orderBy, limit, getDocs, deleteDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
+import { RANK_SYSTEM, getRank } from "../rankService";
 import ShareCardModal from "./ShareCardModal";
-
-const RANK_SYSTEM = [
-  { name: "新手",  min: 0,    max: 10,   color: "#94a3b8", emoji: "🆕" },
-  { name: "銅牌",  min: 11,   max: 99,   color: "#b45309", emoji: "🥉" },
-  { name: "銀牌",  min: 100,  max: 199,  color: "#64748b", emoji: "🥈" },
-  { name: "金牌",  min: 200,  max: 499,  color: "#d97706", emoji: "🥇" },
-  { name: "鉑金",  min: 500,  max: 799,  color: "#7c3aed", emoji: "💎" },
-  { name: "鑽石",  min: 800,  max: 1199, color: "#0ea5e9", emoji: "💠" },
-  { name: "大師",  min: 1200, max: Infinity, color: "#cc0000", emoji: "👑" },
-];
-
-const MOCK_RECORDS = [
-  { id:1, date:"2026/07/01", sport:"🏀", sportName:"籃球 5v5", opponent:"台大隊", result:"勝", pts:10, expired:false },
-  { id:2, date:"2026/06/28", sport:"🏸", sportName:"羽球 單打", opponent:"李大華", result:"勝", pts:15, expired:false },
-  { id:3, date:"2026/06/20", sport:"🏀", sportName:"籃球 3v3", opponent:"系隊B", result:"敗", pts:3,  expired:false },
-];
-
-function getRank(pts) {
-  return RANK_SYSTEM.find(r => pts >= r.min && pts <= r.max) || RANK_SYSTEM[0];
-}
 
 function Avatar({ name, size = 56 }) {
   return (
@@ -50,6 +31,7 @@ export default function Player() {
   const [profile, setProfile] = useState(null); // Firestore profile
   const [loading, setLoading] = useState(true);
   const [records, setRecords] = useState([]);
+  const [rankData, setRankData] = useState([]); // users/{uid}/ranks 子集合資料
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState("");
   const [showShareCard, setShowShareCard] = useState(false);
@@ -68,6 +50,10 @@ export default function Player() {
             query(collection(db, "users", u.uid, "records"), orderBy("createdAt", "desc"), limit(20))
           );
           setRecords(rSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+
+          // 讀取段位資料（各球類模式獨立計算）
+          const rankSnap = await getDocs(collection(db, "users", u.uid, "ranks"));
+          setRankData(rankSnap.docs.map(d => ({ modeKey: d.id, ...d.data() })));
         } catch (e) {
           console.error("Profile load error:", e);
         }
@@ -150,9 +136,9 @@ export default function Player() {
       )}
       {/* Content */}
       <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
-        {tab === "home"    && <HomeTab user={user} profile={profile} displayName={displayName} records={records} navigate={navigate} editingName={editingName} setEditingName={setEditingName} nameInput={nameInput} setNameInput={setNameInput} onSaveName={handleSaveName} onShareCard={() => setShowShareCard(true)} />}
+        {tab === "home"    && <HomeTab user={user} profile={profile} displayName={displayName} records={records} rankData={rankData} navigate={navigate} editingName={editingName} setEditingName={setEditingName} nameInput={nameInput} setNameInput={setNameInput} onSaveName={handleSaveName} onShareCard={() => setShowShareCard(true)} />}
         {tab === "records" && <RecordsTab user={user} records={records} navigate={navigate} />}
-        {tab === "rank"    && <RankTab user={user} records={records} navigate={navigate} />}
+        {tab === "rank"    && <RankTab user={user} rankData={rankData} navigate={navigate} />}
         {tab === "profile" && <ProfileTab user={user} profile={profile} displayName={displayName} onSignOut={handleSignOut} navigate={navigate} />}
       </div>
 
@@ -182,14 +168,22 @@ const SPORT_LABELS = { basketball:"籃球", badminton:"羽球", tabletennis:"桌
 
 
 // ── Home Tab ──
-function HomeTab({ user, profile, displayName, records, navigate, editingName, setEditingName, nameInput, setNameInput, onSaveName, onShareCard }) {
+function HomeTab({ user, profile, displayName, records, rankData, navigate, editingName, setEditingName, nameInput, setNameInput, onSaveName, onShareCard }) {
   const [statFilter, setStatFilter] = useState("全部");
   const sportMap = { "全部": null, "籃球": "basketball", "羽球": "badminton", "匹克球": "pickleball", "桌球": "tabletennis" };
   const filteredRecords = statFilter === "全部" ? records : records.filter(r => r.sport === sportMap[statFilter]);
   const pts = records.reduce((a, r) => a + (r.pts || 0), 0);
   const wins = filteredRecords.filter(r => r.result === "勝").length;
   const totalFiltered = filteredRecords.length;
-  const rank = getRank(pts);
+
+  // 段位是各球類模式獨立計算，首頁徽章顯示「目前所有球類模式中最高的段位」
+  const bestRank = rankData.length
+    ? rankData.reduce((best, r) => {
+        const rk = getRank(r.pts || 0);
+        return RANK_SYSTEM.indexOf(rk) > RANK_SYSTEM.indexOf(best) ? rk : best;
+      }, RANK_SYSTEM[0])
+    : RANK_SYSTEM[0];
+  const rank = bestRank;
 
   if (!user) {
     return (
@@ -465,7 +459,9 @@ function RecordsTab({ user, records, navigate }) {
 }
 
 // ── Rank Tab ──
-function RankTab({ user, records, navigate }) {
+// 段位資料現在來自 users/{uid}/ranks 子集合（各球類模式獨立累積,含連勝加成),
+// 不再從 records 即時加總計算。
+function RankTab({ user, rankData, navigate }) {
   if (!user) {
     return (
       <div style={{ padding: 16, textAlign: "center" }}>
@@ -479,38 +475,42 @@ function RankTab({ user, records, navigate }) {
     );
   }
 
-  // Calculate pts per sport+mode from records
-  const calcPts = (sport, mode) =>
-    records
-      .filter(r => r.sport === sport && r.mode === mode)
-      .reduce((sum, r) => sum + (r.pts || 0), 0);
+  const MODE_LABELS = {
+    basketball_5v5:    { label: "籃球",   mode: "5v5" },
+    basketball_3v3:    { label: "籃球",   mode: "3v3" },
+    badminton_單打:     { label: "羽球",   mode: "單打" },
+    badminton_雙打:     { label: "羽球",   mode: "雙打" },
+    pickleball_單打:    { label: "匹克球", mode: "單打" },
+    pickleball_雙打:    { label: "匹克球", mode: "雙打" },
+    tabletennis_單打:   { label: "桌球",   mode: "單打" },
+  };
 
-  const modes = [
-    { label: "籃球", sport: "basketball", mode: "5v5" },
-    { label: "籃球", sport: "basketball", mode: "3v3" },
-    { label: "羽球", sport: "badminton",  mode: "單打" },
-    { label: "羽球", sport: "badminton",  mode: "雙打" },
-    { label: "匹克球", sport: "pickleball", mode: "單打" },
-    { label: "匹克球", sport: "pickleball", mode: "雙打" },
-    { label: "桌球", sport: "tabletennis", mode: "單打" },
-  ].map(m => ({ ...m, pts: calcPts(m.sport, m.mode) }))
-   .filter(m => m.pts > 0 || true); // show all modes
+  // 顯示所有已知模式，沒打過的顯示 0 分新手
+  const modes = Object.entries(MODE_LABELS).map(([key, info]) => {
+    const found = rankData.find(r => r.modeKey === key);
+    return { key, ...info, pts: found?.pts || 0, streak: found?.streak || 0 };
+  });
 
   return (
     <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
       <div style={{ fontSize: 11, color: "#444", letterSpacing: 2, marginBottom: 4 }}>本季段位</div>
-      {modes.map((r, i) => {
+      {modes.map((r) => {
         const rank = getRank(r.pts);
         const next = RANK_SYSTEM.find(rs => rs.min > r.pts);
         const progress = next
           ? Math.min(100, ((r.pts - rank.min) / (rank.max - rank.min)) * 100)
           : 100;
         return (
-          <div key={i} style={{
+          <div key={r.key} style={{
             background: "#111", border: "1px solid #1e1e1e", borderRadius: 12, padding: "14px 16px",
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: "#f0f0f0" }}>{r.label} {r.mode}</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#f0f0f0" }}>
+                {r.label} {r.mode}
+                {r.streak >= 3 && (
+                  <span style={{ marginLeft: 6, fontSize: 10, color: "#f97316" }}>🔥{r.streak}連勝</span>
+                )}
+              </div>
               <div style={{
                 display: "flex", alignItems: "center", gap: 6,
                 background: rank.color + "18", border: `1px solid ${rank.color}44`,

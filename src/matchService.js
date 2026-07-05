@@ -1,5 +1,6 @@
 import { collection, addDoc, getDoc, getDocs, doc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
+import { getRankData, applyMatchResult, saveRankData } from "./rankService";
 
 // 產生比賽紀錄並存入 Firestore
 export async function createMatch({ sport, mode, teamA, teamB, scoreA, scoreB, winner }) {
@@ -7,7 +8,7 @@ export async function createMatch({ sport, mode, teamA, teamB, scoreA, scoreB, w
 
   const ref = await addDoc(collection(db, "matches"), {
     sport,        // "basketball" | "badminton" | "tabletennis" | "pickleball"
-    mode,         // "5v5" | "3v3" | "singles" | "doubles"
+    mode,         // "5v5" | "3v3" | "單打" | "雙打"
     teamA,        // 隊伍A名稱
     teamB,        // 隊伍B名稱
     scoreA,       // 隊伍A分數
@@ -29,7 +30,7 @@ export async function getMatch(matchId) {
   return { id: snap.id, ...snap.data() };
 }
 
-// 球員認領比賽
+// 球員認領比賽（含段位積分計算 + 連勝加成）
 export async function claimMatch(matchId, uid, { name, side }) {
   // side: "A" | "B" — 球員選擇自己是哪隊
   const matchRef = doc(db, "matches", matchId);
@@ -46,12 +47,17 @@ export async function claimMatch(matchId, uid, { name, side }) {
   // 檢查是否已認領
   if (match.claimedBy?.includes(uid)) throw new Error("你已經認領過這場比賽");
 
-  // 寫入球員個人紀錄
   const isWinner = match.winner === side;
   const score = side === "A"
     ? `${match.scoreA}:${match.scoreB}`
     : `${match.scoreB}:${match.scoreA}`;
 
+  // 段位系統：讀取該球類模式目前狀態 → 套用連勝加成 → 寫回 users/{uid}/ranks
+  const rankCurrent = await getRankData(uid, match.sport, match.mode);
+  const rankResult = applyMatchResult(rankCurrent, isWinner);
+  await saveRankData(uid, match.sport, match.mode, rankResult);
+
+  // 寫入球員個人紀錄（pts 為套用連勝加成後的實際積分）
   await addDoc(collection(db, "users", uid, "records"), {
     matchId,
     sport: match.sport,
@@ -59,7 +65,8 @@ export async function claimMatch(matchId, uid, { name, side }) {
     opponent: side === "A" ? match.teamB : match.teamA,
     score,
     result: isWinner ? "勝" : "敗",
-    pts: isWinner ? 10 : 3,
+    pts: rankResult.earned,
+    streakAtMatch: rankResult.streak,
     side,
     createdAt: serverTimestamp(),
     expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // PRO: 30天, 免費: 14天
@@ -70,10 +77,17 @@ export async function claimMatch(matchId, uid, { name, side }) {
     claimedBy: arrayUnion(uid),
   });
 
-  return { result: isWinner ? "勝" : "敗", pts: isWinner ? 10 : 3 };
+  return {
+    result: isWinner ? "勝" : "敗",
+    pts: rankResult.earned,
+    streak: rankResult.streak,
+    rank: rankResult.rankKey,
+  };
 }
 
 // 修改已認領的隊伍（3小時內有效）
+// 注意：目前此函式尚未同步回溯修正段位積分/連勝資料，
+// 屬於已知邊角案例，待日後用 Firestore transaction 處理。
 export async function updateClaimSide(matchId, uid, newSide) {
   const matchRef = doc(db, "matches", matchId);
   const snap = await getDoc(matchRef);
