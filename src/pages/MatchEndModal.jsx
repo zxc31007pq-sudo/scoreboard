@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { createMatch } from "../matchService";
+import { createMatch, claimMatch } from "../matchService";
+import { auth } from "../firebase";
 
 // QR Code 用 qrcode.react 套件
 // 需要安裝: npm install qrcode.react
@@ -13,18 +14,42 @@ export default function MatchEndModal({ sport, mode, teamA, teamB, scoreA, score
   const [matchId, setMatchId] = useState(null);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [selectedSide, setSelectedSide] = useState(null); // 給已登入使用者直接認領用
+  const [selfClaimResult, setSelfClaimResult] = useState(null);
 
+  const currentUser = auth.currentUser;
   const claimUrl = matchId ? `${BASE_URL}/claim/${matchId}` : "";
 
-  const handleClaim = async () => {
+  // 只產生分享連結(不自行認領),給隊友使用
+  const handleGenerateLink = async () => {
     setStep("loading");
     setError("");
     try {
-      const id = await createMatch({ sport, mode, teamA, teamB, scoreA, scoreB, winner });
-      setMatchId(id);
+      const id = matchId || await createMatch({ sport, mode, teamA, teamB, scoreA, scoreB, winner });
+      if (!matchId) setMatchId(id);
       setStep("qr");
     } catch (e) {
       setError("產生連結失敗，請再試一次");
+      setStep("end");
+    }
+  };
+
+  // 已登入使用者直接認領自己的隊伍(不用再另外掃描/點擊連結)
+  const handleSelfClaim = async () => {
+    if (!selectedSide || !currentUser) return;
+    setStep("loading");
+    setError("");
+    try {
+      const id = matchId || await createMatch({ sport, mode, teamA, teamB, scoreA, scoreB, winner });
+      if (!matchId) setMatchId(id);
+      const result = await claimMatch(id, currentUser.uid, {
+        name: currentUser.displayName || "球員",
+        side: selectedSide,
+      });
+      setSelfClaimResult(result);
+      setStep("qr");
+    } catch (e) {
+      setError(e.message || "認領失敗，請再試一次");
       setStep("end");
     }
   };
@@ -107,12 +132,39 @@ export default function MatchEndModal({ sport, mode, teamA, teamB, scoreA, score
               }}>{error}</div>
             )}
 
-            <button onClick={handleClaim} style={{
+            {/* 已登入使用者:可以直接認領自己的隊伍,不需另外掃碼/點連結 */}
+            {currentUser && (
+              <div style={{
+                background: "#0a0a0a", borderRadius: 12, padding: "14px",
+                display: "flex", flexDirection: "column", gap: 10,
+              }}>
+                <div style={{ fontSize: 11, color: "#555" }}>你是哪一隊？（直接認領）</div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {[{ key: "A", label: teamA }, { key: "B", label: teamB }].map(s => (
+                    <button key={s.key} onClick={() => setSelectedSide(s.key)} style={{
+                      flex: 1, padding: "10px 8px", borderRadius: 8,
+                      background: selectedSide === s.key ? "#cc000022" : "#1a1a1a",
+                      border: `1.5px solid ${selectedSide === s.key ? "#cc0000" : "#2a2a2a"}`,
+                      color: selectedSide === s.key ? "#cc0000" : "#888",
+                      fontSize: 13, fontWeight: 700, cursor: "pointer",
+                    }}>{s.label}</button>
+                  ))}
+                </div>
+                <button onClick={handleSelfClaim} disabled={!selectedSide} style={{
+                  width: "100%", padding: "10px 0", borderRadius: 8,
+                  background: selectedSide ? "#22c55e" : "#333",
+                  border: "none", color: "#fff", fontSize: 13, fontWeight: 800,
+                  cursor: selectedSide ? "pointer" : "not-allowed",
+                }}>✅ 直接認領</button>
+              </div>
+            )}
+
+            <button onClick={handleGenerateLink} style={{
               width: "100%", padding: "12px 0", borderRadius: 10,
               background: "#cc0000", border: "none",
               color: "#fff", fontSize: 14, fontWeight: 800, cursor: "pointer",
             }}>
-              📲 認領這場比賽
+              📲 產生分享連結（給其他球員認領）
             </button>
 
             <button onClick={onClose} style={{
@@ -125,9 +177,21 @@ export default function MatchEndModal({ sport, mode, teamA, teamB, scoreA, score
 
         {step === "qr" && (
           <>
+            {selfClaimResult && (
+              <div style={{
+                background: selfClaimResult.result === "勝" ? "#14532d33" : "#7f1d1d33",
+                border: `1px solid ${selfClaimResult.result === "勝" ? "#22c55e" : "#ef4444"}`,
+                borderRadius: 12, padding: "12px 14px", textAlign: "center",
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: selfClaimResult.result === "勝" ? "#22c55e" : "#ef4444" }}>
+                  你已經認領：{selfClaimResult.result} +{selfClaimResult.pts}積分
+                  {selfClaimResult.streak >= 3 && <span style={{ marginLeft: 6, color: "#f97316" }}>🔥{selfClaimResult.streak}連勝</span>}
+                </div>
+              </div>
+            )}
             <div style={{ textAlign: "center" }}>
               <div style={{ fontSize: 18, fontWeight: 900, color: "#f0f0f0", marginBottom: 4 }}>
-                📲 認領比賽
+                📲 {selfClaimResult ? "分享給其他球員" : "認領比賽"}
               </div>
               <div style={{ fontSize: 12, color: "#555" }}>
                 球員掃描 QR Code 或點擊連結即可認領

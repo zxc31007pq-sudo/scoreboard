@@ -345,6 +345,7 @@ function RecordRow({ record, user, deleteQuota, onUpdate }) {
   const [showDeleteInfo, setShowDeleteInfo] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const icon = { basketball:"🏀", badminton:"🏸", tabletennis:"🏓", pickleball:"🥒" }[record.sport] || "🏅";
   const date = record.createdAt?.toDate ? record.createdAt.toDate().toLocaleDateString("zh-TW") : "";
@@ -352,6 +353,14 @@ function RecordRow({ record, user, deleteQuota, onUpdate }) {
   // Check if within 3 hours (editable)
   const createdAt = record.createdAt?.toDate ? record.createdAt.toDate() : new Date(record.createdAt);
   const editable = record.matchId && (new Date() - createdAt) < 3 * 60 * 60 * 1000;
+  const shareUrl = record.matchId ? `${window.location.origin}/claim/${record.matchId}` : "";
+
+  const handleCopyShareLink = () => {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    });
+  };
 
   // 只有段位系統上線後的新格式紀錄(有 rankBefore/rankAfter 快照)才支援刪除
   const deletable = !!(record.rankBefore && record.rankAfter);
@@ -422,6 +431,25 @@ function RecordRow({ record, user, deleteQuota, onUpdate }) {
           )}
         </div>
       </div>
+
+      {editable && (
+        <div style={{
+          marginTop: 10, paddingTop: 10, borderTop: "1px solid #1a1a1a",
+          display: "flex", alignItems: "center", gap: 8,
+        }}>
+          <span style={{ fontSize: 10, color: "#444", flexShrink: 0 }}>📲 分享給隊友（3小時內有效）</span>
+          <div style={{
+            flex: 1, fontSize: 10, color: "#555",
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          }}>{shareUrl}</div>
+          <button onClick={handleCopyShareLink} style={{
+            padding: "3px 10px", borderRadius: 6, fontSize: 10, fontWeight: 700,
+            background: linkCopied ? "#14532d" : "#1a1a1a",
+            border: `1px solid ${linkCopied ? "#22c55e" : "#2a2a2a"}`,
+            color: linkCopied ? "#22c55e" : "#888", cursor: "pointer", flexShrink: 0,
+          }}>{linkCopied ? "✓ 已複製" : "複製"}</button>
+        </div>
+      )}
 
       {editing && (
         <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #1a1a1a" }}>
