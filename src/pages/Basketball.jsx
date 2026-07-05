@@ -130,7 +130,7 @@ function TeamPanel({ team, idx, poss, onScore, onUndo, onFoul, onFoulSub,
       background: active ? "#0d1a0d" : "#0a0a0a",
       borderRight: isLeft ? "2px solid #1a1a1a" : "none",
       borderLeft:  !isLeft ? "2px solid #1a1a1a" : "none",
-      transition:"background .3s",
+      transition:"background .3s", overflowY:"auto",
     }}>
       {/* Team name */}
       <div onClick={onNameClick} style={{
@@ -419,11 +419,11 @@ export default function Basketball() {
 
         {/* ── CENTER COLUMN — 1/3 total width ── */}
         <div style={{
-          flex:"0 0 33.333%",
+          flex:"0 0 33.333%", minWidth:0,
           background:"#080808",
           borderLeft:"1px solid #1a1a1a", borderRight:"1px solid #1a1a1a",
           display:"flex", flexDirection:"column",
-          overflow:"hidden",
+          overflowY:"auto", overflowX:"hidden",
         }}>
 
           {/* ── TOP 1/3: Main clock with possession arrows on sides ── */}

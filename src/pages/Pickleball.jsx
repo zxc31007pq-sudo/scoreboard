@@ -54,7 +54,7 @@ function ScoreCard({ score, color, lightBg, serving, name, onScore, onUndo,
 
   return (
     <div style={{
-      flex: 1, minWidth: 0, display: "flex", flexDirection: "column",
+      flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflowY: "auto",
       borderRight: side === "left" ? "3px solid #e0e0e0" : "none",
       borderLeft: side === "right" ? "3px solid #e0e0e0" : "none",
       opacity: serving ? 1 : 0.92,
