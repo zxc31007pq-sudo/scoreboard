@@ -615,7 +615,6 @@ function RankTab({ user, rankData, navigate }) {
     badminton_雙打:     { label: "羽球",   mode: "雙打" },
     pickleball_單打:    { label: "匹克球", mode: "單打" },
     pickleball_雙打:    { label: "匹克球", mode: "雙打" },
-    pickleball_匹克球:  { label: "匹克球", mode: "舊資料(修正前)" },
     tabletennis_桌球:   { label: "桌球",   mode: "桌球" },
   };
 
