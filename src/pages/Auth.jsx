@@ -15,7 +15,6 @@ async function createUserProfile(user) {
   if (!snap.exists()) {
     await setDoc(ref, {
       name: user.displayName || "球員",
-      email: user.email,
       plan: "free",
       mainSports: [],
       privacy: "private",
