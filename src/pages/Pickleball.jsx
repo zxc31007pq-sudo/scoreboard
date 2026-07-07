@@ -157,7 +157,7 @@ function ScoreCard({ score, color, lightBg, serving, name, onScore, onUndo,
           fontSize: "22vw",
           fontWeight: 900,
           color: serving ? color : "#ccc",
-          fontFamily: "'Courier New', monospace",
+          fontFamily: "'Bebas Neue', sans-serif",
           letterSpacing: "-0.05em",
           lineHeight: 1,
           userSelect: "none",
@@ -341,7 +341,7 @@ export default function Pickleball() {
     return (
       <div style={{
         height: "100vh", background: "#fff",
-        fontFamily: "'Inter','Helvetica Neue',sans-serif",
+        fontFamily: "'Noto Sans TC','Inter','Helvetica Neue',sans-serif",
         display: "flex", flexDirection: "column", alignItems: "center",
         justifyContent: "center", gap: 20, color: "#222", position: "relative",
       }}>
@@ -430,7 +430,7 @@ export default function Pickleball() {
   return (
     <div style={{
       height: "100vh", width: "100vw", maxWidth: "100vw", background: "#fff",
-      fontFamily: "'Inter','Helvetica Neue',sans-serif",
+      fontFamily: "'Noto Sans TC','Inter','Helvetica Neue',sans-serif",
       display: "flex", flexDirection: "column", overflowX: "hidden", overflowY: "hidden",
     }}>
 
