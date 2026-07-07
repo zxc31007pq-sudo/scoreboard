@@ -92,7 +92,7 @@ export default function Player() {
       <div style={{
         height: "100vh", background: "#0a0a0a",
         display: "flex", alignItems: "center", justifyContent: "center",
-        color: "#555", fontSize: 14, fontFamily: "'Inter',sans-serif",
+        color: "#555", fontSize: 14, fontFamily: "'Noto Sans TC','Inter',sans-serif",
       }}>載入中...</div>
     );
   }
@@ -102,7 +102,7 @@ export default function Player() {
   return (
     <div style={{
       height: "100vh", background: "#0a0a0a",
-      fontFamily: "'Inter','Helvetica Neue',sans-serif",
+      fontFamily: "'Noto Sans TC','Inter','Helvetica Neue',sans-serif",
       color: "#f0f0f0", display: "flex", flexDirection: "column", overflow: "hidden",
     }}>
       {/* Header */}

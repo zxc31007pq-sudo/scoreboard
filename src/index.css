@@ -1,3 +1,12 @@
+/* 饅頭黑體:自架字型,僅供首頁大標語使用(不在 Google Fonts 上) */
+@font-face {
+  font-family: 'MantouSans';
+  src: url('./assets/fonts/MantouSans-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -11,4 +20,6 @@ html, body, #root {
 
 body {
   margin: 0;
+  /* 全站預設:中文吃 Noto Sans TC,英數 fallback 到 Inter/Helvetica */
+  font-family: 'Noto Sans TC', 'Inter', 'Helvetica Neue', sans-serif;
 }

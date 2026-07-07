@@ -28,7 +28,7 @@ export default function StatsCard({ name, records, selectedSports }) {
       background: "#0a0a0a",
       borderRadius: 20,
       padding: "24px 22px",
-      fontFamily: "'Inter','Helvetica Neue',sans-serif",
+      fontFamily: "'Noto Sans TC','Inter','Helvetica Neue',sans-serif",
       color: "#f0f0f0",
       width: "100%",
       boxSizing: "border-box",

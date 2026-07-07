@@ -97,7 +97,7 @@ function TimeoutTimer({ onClose }) {
         <div style={{
           fontSize:80, fontWeight:900,
           color: urgent ? "#ef4444" : "#f59e0b",
-          fontFamily:"'Courier New',monospace",
+          fontFamily:"'Bebas Neue', sans-serif",
           fontVariantNumeric:"tabular-nums", lineHeight:1,
         }}>{String(t.secs).padStart(2,"0")}</div>
         <div style={{display:"flex", gap:12, justifyContent:"center", marginTop:20}}>
@@ -164,7 +164,7 @@ function TeamPanel({ team, idx, poss, onScore, onUndo, onFoul, onFoulSub,
           fontSize:"min(16vw, 130px)",
           fontWeight:900, color:"#f0f0f0",
           fontVariantNumeric:"tabular-nums", letterSpacing:"-0.04em",
-          fontFamily:"'Courier New', monospace",
+          fontFamily:"'Bebas Neue', sans-serif",
         }}>{String(team.score).padStart(2,"0")}</div>
       </div>
 
@@ -351,7 +351,7 @@ export default function Basketball() {
   return (
     <div style={{
       height:"100vh", width:"100vw", maxWidth:"100vw", background:"#0a0a0a",
-      fontFamily:"'Inter','Helvetica Neue',sans-serif",
+      fontFamily:"'Noto Sans TC','Inter','Helvetica Neue',sans-serif",
       color:"#e0e0e0", display:"flex", flexDirection:"column",
       overflowX:"hidden", overflowY:"hidden",
     }}>
@@ -452,7 +452,7 @@ export default function Basketball() {
                 fontSize:"min(6.5vw, 11vh)",
                 fontWeight:900,
                 color: main.secs<=10 && main.secs>0 ? "#ef4444" : "#f0f0f0",
-                fontFamily:"'Courier New',monospace",
+                fontFamily:"'Bebas Neue', sans-serif",
                 fontVariantNumeric:"tabular-nums",
                 transition:"color .3s", lineHeight:1,
                 width:"100%", textAlign:"center",
@@ -482,7 +482,7 @@ export default function Basketball() {
               fontSize:"min(18vw, 22vh)",
               fontWeight:900,
               color: shot.secs<=10 && shot.secs>0 ? "#ef4444" : "#f59e0b",
-              fontFamily:"'Courier New',monospace",
+              fontFamily:"'Bebas Neue', sans-serif",
               fontVariantNumeric:"tabular-nums",
               transition:"color .3s", lineHeight:1,
             }}>{String(shot.secs).padStart(2,"0")}</div>
