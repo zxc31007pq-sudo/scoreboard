@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SPORTS = [
-  { id: "basketball", emoji: "🏀", name: "籃球", nameEn: "BASKETBALL", accent: "#cc0000", score: "24", features: ["節次管理", "24秒進攻計時", "犯規記錄", "球權顯示"] },
+  { id: "basketball", emoji: "🏀", name: "籃球", nameEn: "BASKETBALL", accent: "#2f6fdb", score: "24", features: ["節次管理", "24秒進攻計時", "犯規記錄", "球權顯示"] },
   { id: "badminton",  emoji: "🏸", name: "羽球", nameEn: "BADMINTON",  accent: "#1d4ed8", score: "21", features: ["單打 / 雙打", "21分制", "發球權", "局數記錄"] },
   { id: "tabletennis",emoji: "🏓", name: "桌球", nameEn: "TABLE TENNIS",accent: "#059669", score: "11", features: ["三局兩勝 / 五局三勝", "11分制", "單打"] },
   { id: "pickleball", emoji: "🥒", name: "匹克球",nameEn: "PICKLEBALL", accent: "#7c3aed", score: "11", features: ["單打 / 雙打", "傳統規則", "發球區提示", "一局 / 三局兩勝"] },
@@ -15,7 +15,7 @@ function SportCard({ sport, onClick }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        position: "relative", background: hovered ? "#1a1a1a" : "#111",
+        position: "relative", background: hovered ? "#383b42" : "#2c2e33",
         border: `1.5px solid ${hovered ? sport.accent : "#222"}`,
         borderRadius: 16, padding: "20px 20px 16px", cursor: "pointer",
         transition: "border-color .2s, background .2s, transform .15s",
@@ -34,7 +34,7 @@ function SportCard({ sport, onClick }) {
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: "auto" }}>
         {sport.features.map(f => (
-          <span key={f} style={{ fontSize: 10, color: "#666", background: "#0a0a0a", border: "1px solid #1e1e1e", borderRadius: 6, padding: "2px 8px" }}>{f}</span>
+          <span key={f} style={{ fontSize: 10, color: "#666", background: "#24262b", border: "1px solid #40434b", borderRadius: 6, padding: "2px 8px" }}>{f}</span>
         ))}
       </div>
       {hovered && <div style={{ position: "absolute", bottom: 16, right: 16, fontSize: 18, color: sport.accent, fontWeight: 900 }}>→</div>}
@@ -48,20 +48,20 @@ export default function Homepage() {
 
   return (
     <div style={{
-      minHeight: "100vh", background: "#0e0e0e",
+      minHeight: "100vh", background: "#24262b",
       fontFamily: "'Noto Sans TC', 'Inter', 'Helvetica Neue', sans-serif",
       color: "#f5f5f5", display: "flex", flexDirection: "column",
     }}>
 
       {/* NAV */}
       <nav style={{
-        height: 52, flexShrink: 0, borderBottom: "1px solid #1a1a1a",
+        height: 52, flexShrink: 0, borderBottom: "1px solid #383b42",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 28px", background: "#0e0e0e",
+        padding: "0 28px", background: "#24262b",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
-            width: 28, height: 28, borderRadius: 7, background: "#cc0000",
+            width: 28, height: 28, borderRadius: 7, background: "#2f6fdb",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 14, fontWeight: 900, color: "#fff", fontFamily: "'Courier New', monospace",
           }}>S</div>
@@ -70,7 +70,7 @@ export default function Homepage() {
 
         {/* Tab switcher */}
         <div style={{
-          display: "flex", background: "#1a1a1a", borderRadius: 10,
+          display: "flex", background: "#383b42", borderRadius: 10,
           padding: 3, gap: 2,
         }}>
           {[
@@ -79,7 +79,7 @@ export default function Homepage() {
           ].map(t => (
             <button key={t.key} onClick={() => t.key === "player" ? navigate("/player") : setTab(t.key)} style={{
               padding: "5px 14px", borderRadius: 8, fontSize: 11, fontWeight: 700,
-              background: tab === t.key ? "#cc0000" : "transparent",
+              background: tab === t.key ? "#2f6fdb" : "transparent",
               border: "none", color: tab === t.key ? "#fff" : "#555",
               cursor: "pointer", letterSpacing: 1, transition: "all .2s",
             }}>{t.label}</button>
@@ -91,13 +91,13 @@ export default function Homepage() {
 
       {/* HERO */}
       <div style={{
-        padding: "48px 28px 40px", borderBottom: "1px solid #141414",
+        padding: "48px 28px 40px", borderBottom: "1px solid #2a2c31",
         position: "relative", overflow: "hidden",
       }}>
         <div style={{
           position: "absolute", top: -20, right: 28,
           fontSize: "clamp(80px, 18vw, 180px)", fontWeight: 900,
-          fontFamily: "'Courier New', monospace", color: "#cc0000", opacity: 0.05,
+          fontFamily: "'Courier New', monospace", color: "#2f6fdb", opacity: 0.05,
           lineHeight: 1, pointerEvents: "none", userSelect: "none", letterSpacing: -8,
         }}>00 VS 00</div>
 
@@ -107,7 +107,7 @@ export default function Homepage() {
           fontFamily: "'MantouSans', 'Noto Sans TC', sans-serif",
         }}>
           每一場對決，都值得被記錄。<br/>
-          <span style={{ color: "#cc0000" }}>現在就揪朋友，開始比賽！</span>
+          <span style={{ color: "#2f6fdb" }}>現在就揪朋友，開始比賽！</span>
         </h1>
         <p style={{ fontSize: 14, color: "#555", margin: 0, maxWidth: 400, lineHeight: 1.7 }}>
           認領比賽，建立個人戰績、勝率與歷史紀錄。
@@ -129,19 +129,19 @@ export default function Homepage() {
       {/* Player version banner */}
       <div onClick={() => navigate("/player")} style={{
         margin: "0 28px 28px",
-        background: "linear-gradient(135deg, #1a1a1a 0%, #111 100%)",
-        border: "1px solid #2a2a2a", borderRadius: 14,
+        background: "linear-gradient(135deg, #383b42 0%, #2c2e33 100%)",
+        border: "1px solid #484b54", borderRadius: 14,
         padding: "18px 24px", cursor: "pointer",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         transition: "border-color .2s",
       }}
-        onMouseEnter={e => e.currentTarget.style.borderColor = "#cc0000"}
-        onMouseLeave={e => e.currentTarget.style.borderColor = "#2a2a2a"}
+        onMouseEnter={e => e.currentTarget.style.borderColor = "#2f6fdb"}
+        onMouseLeave={e => e.currentTarget.style.borderColor = "#484b54"}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <div style={{
-            width: 44, height: 44, borderRadius: 12, background: "#cc000022",
-            border: "1px solid #cc000044",
+            width: 44, height: 44, borderRadius: 12, background: "#2f6fdb22",
+            border: "1px solid #2f6fdb44",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 22,
           }}>👤</div>
@@ -155,11 +155,11 @@ export default function Homepage() {
 
       {/* FOOTER */}
       <div style={{
-        borderTop: "1px solid #141414", padding: "14px 28px",
+        borderTop: "1px solid #2a2c31", padding: "14px 28px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         <span style={{ fontSize: 10, color: "#333", letterSpacing: 1 }}>SCOREBOARD © 2026</span>
-        <span style={{ fontSize: 10, color: "#2a2a2a", letterSpacing: 1 }}>廣告支援營運</span>
+        <span style={{ fontSize: 10, color: "#484b54", letterSpacing: 1 }}>廣告支援營運</span>
       </div>
     </div>
   );
