@@ -6,6 +6,19 @@ import { auth, db } from "../firebase";
 import { RANK_SYSTEM, getRank, getAllRankData, getNextResetInfo } from "../rankService";
 import ShareCardModal from "./ShareCardModal";
 
+import sportBasketball  from "../assets/icons/sport_basketball.png";
+import sportBadminton   from "../assets/icons/sport_badminton.png";
+import sportTabletennis from "../assets/icons/sport_tabletennis.png";
+import sportPickleball  from "../assets/icons/sport_pickleball.png";
+import tabRecordsIcon   from "../assets/icons/tab_records.png";
+import tabRankIcon      from "../assets/icons/tab_rank.png";
+import streakFire       from "../assets/icons/streak_fire.png";
+
+const SPORT_IMGS = {
+  basketball: sportBasketball, badminton: sportBadminton,
+  tabletennis: sportTabletennis, pickleball: sportPickleball,
+};
+
 function Avatar({ name, size = 56 }) {
   return (
     <div style={{
@@ -19,8 +32,8 @@ function Avatar({ name, size = 56 }) {
 
 const TABS = [
   { key: "home",    label: "首頁", icon: "🏠" },
-  { key: "records", label: "紀錄", icon: "📋" },
-  { key: "rank",    label: "段位", icon: "🏅" },
+  { key: "records", label: "紀錄", img: tabRecordsIcon },
+  { key: "rank",    label: "段位", img: tabRankIcon },
   { key: "profile", label: "個人", icon: "👤" },
 ];
 
@@ -159,7 +172,9 @@ export default function Player() {
             alignItems: "center", justifyContent: "center", gap: 3,
             background: "none", border: "none", cursor: "pointer",
           }}>
-            <span style={{ fontSize: 18 }}>{t.icon}</span>
+            {t.img
+              ? <img src={t.img} alt={t.label} style={{ width: 20, height: 20, objectFit: "contain" }} />
+              : <span style={{ fontSize: 18 }}>{t.icon}</span>}
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: tab === t.key ? "#2f6fdb" : "#444" }}>{t.label}</span>
             {tab === t.key && <div style={{ width: 20, height: 2, background: "#2f6fdb", borderRadius: 2 }} />}
           </button>
@@ -274,7 +289,7 @@ function HomeTab({ user, profile, displayName, records, rankData, deleteQuota, n
               background: rank.color + "18", border: `1px solid ${rank.color}44`,
               borderRadius: 6, padding: "2px 8px",
             }}>
-              <span style={{ fontSize: 12 }}>{rank.emoji}</span>
+              <img src={rank.icon} alt={rank.name} style={{ width: 15, height: 15, objectFit: "contain" }} />
               <span style={{ fontSize: 10, fontWeight: 700, color: rank.color }}>{rank.name}</span>
             </div>
           </div>
@@ -347,7 +362,7 @@ function RecordRow({ record, user, deleteQuota, onUpdate }) {
   const [deleteError, setDeleteError] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
 
-  const icon = { basketball:"🏀", badminton:"🏸", tabletennis:"🏓", pickleball:"🥒" }[record.sport] || "🏅";
+  const sportIcon = SPORT_IMGS[record.sport];
   const date = record.createdAt?.toDate ? record.createdAt.toDate().toLocaleDateString("zh-TW") : "";
 
   // Check if within 3 hours (editable)
@@ -399,7 +414,9 @@ function RecordRow({ record, user, deleteQuota, onUpdate }) {
       padding: "12px 14px",
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <span style={{ fontSize: 20 }}>{icon}</span>
+        {sportIcon
+          ? <img src={sportIcon} alt={record.sport} style={{ width: 22, height: 22, objectFit: "contain", flexShrink: 0 }} />
+          : <span style={{ fontSize: 20 }}>🏅</span>}
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: "#f0f0f0" }}>
             {record.sport === "basketball" ? "籃球" : record.sport === "badminton" ? "羽球" : record.sport === "tabletennis" ? "桌球" : "匹克球"} {record.mode}
@@ -641,7 +658,9 @@ function RankTab({ user, rankData, navigate }) {
               <div style={{ fontSize: 13, fontWeight: 800, color: "#f0f0f0" }}>
                 {r.label} {r.mode}
                 {r.streak >= 3 && (
-                  <span style={{ marginLeft: 6, fontSize: 10, color: "#f97316" }}>🔥{r.streak}連勝</span>
+                  <span style={{ marginLeft: 6, fontSize: 10, color: "#f97316", display: "inline-flex", alignItems: "center", gap: 3 }}>
+                    <img src={streakFire} alt="連勝" style={{ width: 13, height: 13, objectFit: "contain" }} />{r.streak}連勝
+                  </span>
                 )}
               </div>
               <div style={{
@@ -649,7 +668,7 @@ function RankTab({ user, rankData, navigate }) {
                 background: rank.color + "18", border: `1px solid ${rank.color}44`,
                 borderRadius: 8, padding: "4px 12px",
               }}>
-                <span>{rank.emoji}</span>
+                <img src={rank.icon} alt={rank.name} style={{ width: 16, height: 16, objectFit: "contain" }} />
                 <span style={{ fontSize: 13, fontWeight: 700, color: rank.color }}>{rank.name}</span>
               </div>
             </div>
