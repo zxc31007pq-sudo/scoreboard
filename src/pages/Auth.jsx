@@ -75,7 +75,7 @@ export default function Auth() {
   return (
     <div style={{
       height: "100vh", background: "#0a0a0a",
-      fontFamily: "'Inter','Helvetica Neue',sans-serif",
+      fontFamily: "'Noto Sans TC','Inter','Helvetica Neue',sans-serif",
       display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center", padding: "0 24px",
     }}>

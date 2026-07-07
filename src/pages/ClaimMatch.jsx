@@ -64,7 +64,7 @@ export default function ClaimMatch() {
       <div style={{
         height: "100vh", background: "#0a0a0a",
         display: "flex", alignItems: "center", justifyContent: "center",
-        color: "#555", fontSize: 14, fontFamily: "'Inter',sans-serif",
+        color: "#555", fontSize: 14, fontFamily: "'Noto Sans TC','Inter',sans-serif",
       }}>載入比賽資料...</div>
     );
   }
@@ -74,7 +74,7 @@ export default function ClaimMatch() {
       <div style={{
         height: "100vh", background: "#0a0a0a",
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        gap: 16, fontFamily: "'Inter',sans-serif",
+        gap: 16, fontFamily: "'Noto Sans TC','Inter',sans-serif",
       }}>
         <div style={{ fontSize: 40 }}>❌</div>
         <div style={{ fontSize: 16, color: "#f0f0f0", fontWeight: 700 }}>比賽不存在或已過期</div>
@@ -94,7 +94,7 @@ export default function ClaimMatch() {
   return (
     <div style={{
       minHeight: "100vh", background: "#0a0a0a",
-      fontFamily: "'Inter','Helvetica Neue',sans-serif",
+      fontFamily: "'Noto Sans TC','Inter','Helvetica Neue',sans-serif",
       display: "flex", flexDirection: "column", alignItems: "center",
       justifyContent: "center", padding: "24px 16px",
     }}>

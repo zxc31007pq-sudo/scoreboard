@@ -49,7 +49,7 @@ export default function Homepage() {
   return (
     <div style={{
       minHeight: "100vh", background: "#0e0e0e",
-      fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+      fontFamily: "'Noto Sans TC', 'Inter', 'Helvetica Neue', sans-serif",
       color: "#f5f5f5", display: "flex", flexDirection: "column",
     }}>
 
@@ -102,8 +102,9 @@ export default function Homepage() {
         }}>00 VS 00</div>
 
         <h1 style={{
-          fontSize: "clamp(28px, 5vw, 52px)", fontWeight: 900, lineHeight: 1.1,
+          fontSize: "clamp(28px, 5vw, 52px)", fontWeight: "normal", lineHeight: 1.1,
           color: "#f5f5f5", margin: "0 0 14px", letterSpacing: -1,
+          fontFamily: "'MantouSans', 'Noto Sans TC', sans-serif",
         }}>
           每一場對決，都值得被記錄。<br/>
           <span style={{ color: "#cc0000" }}>現在就揪朋友，開始比賽！</span>

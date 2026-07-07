@@ -6,7 +6,7 @@ export default function BasketballSelect() {
   return (
     <div style={{
       height: "100vh", width: "100vw", maxWidth: "100vw", background: "#0a0a0a",
-      fontFamily: "'Inter','Helvetica Neue',sans-serif",
+      fontFamily: "'Noto Sans TC','Inter','Helvetica Neue',sans-serif",
       display: "flex", flexDirection: "column",
       overflowX: "hidden", overflowY: "auto",
     }}>
