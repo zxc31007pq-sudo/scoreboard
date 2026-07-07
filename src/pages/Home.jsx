@@ -102,7 +102,7 @@ export default function Homepage() {
         }}>00 VS 00</div>
 
         <h1 style={{
-          fontSize: "clamp(28px, 5vw, 52px)", fontWeight: 900, lineHeight: 1.1,
+          fontSize: "clamp(28px, 5vw, 52px)", fontWeight: "normal", lineHeight: 1.1,
           color: "#f5f5f5", margin: "0 0 14px", letterSpacing: -1,
           fontFamily: "'MantouSans', 'Noto Sans TC', sans-serif",
         }}>
