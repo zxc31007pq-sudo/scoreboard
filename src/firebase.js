@@ -3,12 +3,12 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDBJGqvlt1iadbapQa8L1mc4mSA0HV37wk",
-  authDomain: "scoreboard-dev-e124d.firebaseapp.com",
-  projectId: "scoreboard-dev-e124d",
-  storageBucket: "scoreboard-dev-e124d.firebasestorage.app",
-  messagingSenderId: "622932369401",
-  appId: "1:622932369401:web:fc8d131ba88c0634dea728",
+  apiKey: "AIzaSyDc8J33lUuk3FY6JDQEe9hnRVEmOawMWwY",
+  authDomain: "scoreboard-1b6b3.firebaseapp.com",
+  projectId: "scoreboard-1b6b3",
+  storageBucket: "scoreboard-1b6b3.firebasestorage.app",
+  messagingSenderId: "132139914097",
+  appId: "1:132139914097:web:84216a6e454599dd0d1cd0",
 };
 
 const app  = initializeApp(firebaseConfig);
