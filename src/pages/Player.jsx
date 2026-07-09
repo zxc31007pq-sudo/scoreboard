@@ -32,10 +32,10 @@ function Avatar({ name, size = 56 }) {
 }
 
 const TABS = [
-  { key: "home",    label: "首頁", icon: "🏠" },
+  { key: "home",    label: "個人", img: jerseyIcon },
   { key: "records", label: "紀錄", img: tabRecordsIcon },
   { key: "rank",    label: "段位", img: tabRankIcon },
-  { key: "profile", label: "個人", img: jerseyIcon },
+  { key: "profile", label: "設定", icon: "⚙️" },
 ];
 
 export default function Player() {

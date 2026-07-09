@@ -298,6 +298,11 @@ export default function Badminton() {
             cursor:"pointer", letterSpacing:2,
           }}>開始比賽</button>
         )}
+
+        <button onClick={() => navigate("/quick-record?sport=badminton" + (mode ? "&mode=" + encodeURIComponent(mode === "doubles" ? "雙打" : "單打") : ""))} style={{
+          background: "none", border: "none", color: "#aaa", fontSize: 12,
+          textDecoration: "underline", cursor: "pointer", fontFamily: "inherit",
+        }}>不想一分一分計？直接輸入結果 →</button>
       </div>
     );
   }

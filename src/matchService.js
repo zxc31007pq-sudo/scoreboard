@@ -16,7 +16,7 @@ function getMaxClaimsForMode(sport, mode) {
 }
 
 // 產生比賽紀錄並存入 Firestore
-export async function createMatch({ sport, mode, teamA, teamB, scoreA, scoreB, winner }) {
+export async function createMatch({ sport, mode, teamA, teamB, scoreA, scoreB, winner, source }) {
   const expiresAt = new Date(Date.now() + 3 * 60 * 60 * 1000); // 3小時後失效
 
   const ref = await addDoc(collection(db, "matches"), {
@@ -33,6 +33,7 @@ export async function createMatch({ sport, mode, teamA, teamB, scoreA, scoreB, w
     createdAt: serverTimestamp(),
     expiresAt,
     status: "active",
+    ...(source ? { source } : {}), // 可選欄位:快速計分模式標記 "quick",未傳入則不寫入(向下相容)
   });
 
   return ref.id; // 回傳比賽 ID

@@ -243,6 +243,11 @@ export default function TableTennis() {
             cursor: "pointer", letterSpacing: 2,
           }}>開始比賽</button>
         )}
+
+        <button onClick={() => navigate("/quick-record?sport=tabletennis&mode=" + encodeURIComponent("桌球"))} style={{
+          background: "none", border: "none", color: "#aaa", fontSize: 12,
+          textDecoration: "underline", cursor: "pointer", fontFamily: "inherit",
+        }}>不想一分一分計？直接輸入結果 →</button>
       </div>
     );
   }
