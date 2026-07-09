@@ -13,6 +13,7 @@ import sportPickleball  from "../assets/icons/sport_pickleball.png";
 import tabRecordsIcon   from "../assets/icons/tab_records.png";
 import tabRankIcon      from "../assets/icons/tab_rank.png";
 import streakFire       from "../assets/icons/streak_fire.png";
+import jerseyIcon       from "../assets/icons/jersey.png";
 
 const SPORT_IMGS = {
   basketball: sportBasketball, badminton: sportBadminton,
@@ -34,7 +35,7 @@ const TABS = [
   { key: "home",    label: "首頁", icon: "🏠" },
   { key: "records", label: "紀錄", img: tabRecordsIcon },
   { key: "rank",    label: "段位", img: tabRankIcon },
-  { key: "profile", label: "個人", icon: "👤" },
+  { key: "profile", label: "個人", img: jerseyIcon },
 ];
 
 export default function Player() {
