@@ -1,14 +1,22 @@
 import { doc, getDoc, setDoc, collection, getDocs, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 
+import rankNewbie   from "./assets/icons/rank_newbie.png";
+import rankBronze   from "./assets/icons/rank_bronze.png";
+import rankSilver   from "./assets/icons/rank_silver.png";
+import rankGold     from "./assets/icons/rank_gold.png";
+import rankPlatinum from "./assets/icons/rank_platinum.png";
+import rankDiamond  from "./assets/icons/rank_diamond.png";
+import rankMaster   from "./assets/icons/rank_master.png";
+
 export const RANK_SYSTEM = [
-  { key: "newbie",   name: "新手", min: 0,    max: 10,       color: "#94a3b8", emoji: "🆕" },
-  { key: "bronze",   name: "銅牌", min: 11,   max: 99,       color: "#b45309", emoji: "🥉" },
-  { key: "silver",   name: "銀牌", min: 100,  max: 199,      color: "#64748b", emoji: "🥈" },
-  { key: "gold",     name: "金牌", min: 200,  max: 499,      color: "#d97706", emoji: "🥇" },
-  { key: "platinum", name: "鉑金", min: 500,  max: 799,      color: "#7c3aed", emoji: "💎" },
-  { key: "diamond",  name: "鑽石", min: 800,  max: 1499,     color: "#0ea5e9", emoji: "💠" },
-  { key: "master",   name: "大師", min: 1500, max: Infinity, color: "#cc0000", emoji: "👑" },
+  { key: "newbie",   name: "新手", min: 0,    max: 10,       color: "#94a3b8", emoji: "🆕", icon: rankNewbie },
+  { key: "bronze",   name: "銅牌", min: 11,   max: 99,       color: "#b45309", emoji: "🥉", icon: rankBronze },
+  { key: "silver",   name: "銀牌", min: 100,  max: 199,      color: "#64748b", emoji: "🥈", icon: rankSilver },
+  { key: "gold",     name: "金牌", min: 200,  max: 499,      color: "#d97706", emoji: "🥇", icon: rankGold },
+  { key: "platinum", name: "鉑金", min: 500,  max: 799,      color: "#7c3aed", emoji: "💎", icon: rankPlatinum },
+  { key: "diamond",  name: "鑽石", min: 800,  max: 1499,     color: "#0ea5e9", emoji: "💠", icon: rankDiamond },
+  { key: "master",   name: "大師", min: 1500, max: Infinity, color: "#cc0000", emoji: "👑", icon: rankMaster },
 ];
 
 export function getRank(pts) {
