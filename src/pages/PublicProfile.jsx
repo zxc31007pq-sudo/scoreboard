@@ -80,7 +80,7 @@ export default function PublicProfile() {
           color: "#555", cursor: "pointer",
         }}>← 首頁</button>
         <span style={{ fontSize: 11, color: "#cc0000", fontWeight: 800, letterSpacing: 3 }}>
-          SCOREBOARD
+          KEEGOING
         </span>
         <div style={{ width: 60 }} />
       </div>

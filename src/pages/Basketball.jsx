@@ -380,7 +380,7 @@ export default function Basketball() {
             color:"#555", cursor:"pointer", letterSpacing:1,
           }}>← 首頁</button>
           <span style={{fontSize:22}}>🏀</span>
-          <span style={{fontSize:13, fontWeight:800, letterSpacing:3, color:"#cc0000"}}>SCOREBOARD</span>
+          <span style={{fontSize:13, fontWeight:800, letterSpacing:3, color:"#cc0000"}}>KEEGOING</span>
         </div>
         <div style={{display:"flex", gap:6, alignItems:"center", flexWrap:"wrap", minWidth:0, justifyContent:"center"}}>
           {QUARTERS.map((q,i)=>(
