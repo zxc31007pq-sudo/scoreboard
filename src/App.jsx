@@ -10,6 +10,7 @@ import Player from "./pages/Player";
 import Auth from "./pages/Auth";
 import ClaimMatch from "./pages/ClaimMatch";
 import PublicProfile from "./pages/PublicProfile";
+import QuickRecord from "./pages/QuickRecord";
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/basketball3v3" element={<Basketball3v3 />} />
         <Route path="/player" element={<Player />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/quick-record" element={<QuickRecord />} />
         <Route path="/claim/:matchId" element={<ClaimMatch />} />
         <Route path="/profile/:uid" element={<PublicProfile />} />
       </Routes>

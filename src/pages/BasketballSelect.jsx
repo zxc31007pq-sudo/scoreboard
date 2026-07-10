@@ -62,6 +62,14 @@ export default function BasketballSelect() {
           onClick={() => navigate("/basketball3v3")}
         />
       </div>
+
+      {/* 快速計分入口:直接輸入結果,頁面內再選 5v5/3v3 */}
+      <div style={{ textAlign: "center", padding: "0 16px 28px" }}>
+        <button onClick={() => navigate("/quick-record?sport=basketball")} style={{
+          background: "none", border: "none", color: "#555", fontSize: 12,
+          textDecoration: "underline", cursor: "pointer", fontFamily: "inherit",
+        }}>不想一分一分計？直接輸入結果 →</button>
+      </div>
     </div>
   );
 }
