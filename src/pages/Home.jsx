@@ -66,7 +66,8 @@ export default function Homepage() {
         padding: "0 28px", background: "#24262b",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <img src={logo} alt="KEEGOING" style={{ height: 32, width: "auto" }} />
+          <img src={logo} alt="KEEGOING" style={{ height: 34, width: "auto" }} />
+          <span style={{ fontSize: 15, fontWeight: 900, letterSpacing: 2, color: "#f5f5f5" }}>KEEGOING</span>
         </div>
 
         {/* Tab switcher */}
