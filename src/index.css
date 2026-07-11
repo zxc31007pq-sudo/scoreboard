@@ -18,6 +18,13 @@ html, body, #root {
   height: 100%;
 }
 
+html {
+  /* 關閉手機瀏覽器(尤其iOS Safari)的自動文字大小調整,
+     避免同一頁面裡不同元素的字級被瀏覽器各自加大、跟設計稿不一致 */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   /* 全站預設:中文吃 Noto Sans TC,英數 fallback 到 Inter/Helvetica */
