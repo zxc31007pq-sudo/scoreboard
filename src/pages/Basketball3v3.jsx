@@ -194,6 +194,7 @@ export default function Basketball3v3() {
         fontFamily: "'Noto Sans TC','Inter','Helvetica Neue',sans-serif",
         display: "flex", flexDirection: "column", alignItems: "center",
         justifyContent: "center", gap: 24, color: "#f0f0f0", position: "relative",
+        padding: "0 20px", boxSizing: "border-box",
       }}>
         <button onClick={() => navigate("/basketball-select")} style={{
           position: "absolute", top: 16, left: 16,
@@ -239,17 +240,18 @@ export default function Basketball3v3() {
         </div>
 
         {/* Team names */}
-        <div style={{ display: "flex", gap: 24 }}>
+        <div style={{ display: "flex", gap: 16, width: "100%", maxWidth: 340, minWidth: 0 }}>
           {[0, 1].map(i => (
-            <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
+            <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center", flex: 1, minWidth: 0 }}>
               <div style={{ width: 12, height: 12, borderRadius: "50%", background: COLORS[i] }} />
               <input value={names[i]}
                 onChange={e => { const n = [...names]; n[i] = e.target.value; setNames(n); }}
                 placeholder={i === 0 ? "主隊" : "客隊"}
                 style={{
+                  width: "100%", boxSizing: "border-box",
                   background: "#1a1a1a", border: `1.5px solid ${COLORS[i]}`,
                   borderRadius: 8, color: "#f0f0f0", fontSize: 14,
-                  padding: "8px 14px", outline: "none", textAlign: "center",
+                  padding: "8px 10px", outline: "none", textAlign: "center",
                   fontFamily: "inherit",
                 }} />
             </div>

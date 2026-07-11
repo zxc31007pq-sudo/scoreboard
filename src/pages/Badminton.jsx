@@ -220,6 +220,7 @@ export default function Badminton() {
         fontFamily:"'Noto Sans TC','Inter','Helvetica Neue',sans-serif",
         display:"flex", flexDirection:"column", alignItems:"center",
         justifyContent:"center", gap:24, color:"#222",
+        padding:"0 20px", boxSizing:"border-box",
       }}>
         <button onClick={()=>navigate("/")} style={{
           position:"absolute", top:16, left:16,
@@ -261,17 +262,18 @@ export default function Badminton() {
         )}
 
         {mode && format && (
-          <div style={{display:"flex", gap:28, marginTop:4}}>
+          <div style={{display:"flex", gap:16, marginTop:4, width:"100%", maxWidth:340, minWidth:0}}>
             {[0,1].map(i=>(
-              <div key={i} style={{display:"flex", flexDirection:"column", gap:8, alignItems:"center"}}>
+              <div key={i} style={{display:"flex", flexDirection:"column", gap:8, alignItems:"center", flex:1, minWidth:0}}>
                 <div style={{width:14, height:14, borderRadius:"50%", background:COLORS[i]}}/>
                 <input value={names[i]}
                   onChange={e=>{ const n=[...names]; n[i]=e.target.value; setNames(n); }}
                   placeholder={i===0?"左隊名稱":"右隊名稱"}
                   style={{
+                    width:"100%", boxSizing:"border-box",
                     background:"#f8f8f8", border:`1.5px solid ${COLORS[i]}`,
                     borderRadius:8, color:"#222", fontSize:14,
-                    padding:"8px 14px", outline:"none", textAlign:"center",
+                    padding:"8px 10px", outline:"none", textAlign:"center",
                     fontFamily:"inherit",
                   }}/>
                 {mode==="doubles" && doubles[i].map((p,j)=>(
@@ -279,10 +281,11 @@ export default function Badminton() {
                     onChange={e=>{ const d=doubles.map(r=>[...r]); d[i][j]=e.target.value; setDoubles(d); }}
                     placeholder={`球員 ${j+1}`}
                     style={{
+                      width:"100%", maxWidth:110, boxSizing:"border-box",
                       background:"#f8f8f8", border:"1px solid #ddd",
                       borderRadius:6, color:"#555", fontSize:13,
-                      padding:"6px 12px", outline:"none", textAlign:"center",
-                      fontFamily:"inherit", width:110,
+                      padding:"6px 8px", outline:"none", textAlign:"center",
+                      fontFamily:"inherit",
                     }}/>
                 ))}
               </div>
