@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "../assets/logo.png";
 
 import sportBasketball  from "../assets/icons/sport_basketball.png";
 import sportBadminton   from "../assets/icons/sport_badminton.png";
@@ -65,12 +66,8 @@ export default function Homepage() {
         padding: "0 28px", background: "#24262b",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 28, height: 28, borderRadius: 7, background: "#2f6fdb",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 14, fontWeight: 900, color: "#fff", fontFamily: "'Courier New', monospace",
-          }}>S</div>
-          <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 3, color: "#f5f5f5" }}>SCOREBOARD</span>
+          <img src={logo} alt="KEEGOING" style={{ height: 34, width: "auto" }} />
+          <span style={{ fontSize: 15, fontWeight: 900, letterSpacing: 2, color: "#f5f5f5" }}>KEEGOING</span>
         </div>
 
         {/* Tab switcher */}
@@ -163,7 +160,7 @@ export default function Homepage() {
         borderTop: "1px solid #2a2c31", padding: "14px 28px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
-        <span style={{ fontSize: 10, color: "#333", letterSpacing: 1 }}>SCOREBOARD © 2026</span>
+        <span style={{ fontSize: 10, color: "#333", letterSpacing: 1 }}>KEEGOING © 2026</span>
         <span style={{ fontSize: 10, color: "#484b54", letterSpacing: 1 }}>廣告支援營運</span>
       </div>
     </div>

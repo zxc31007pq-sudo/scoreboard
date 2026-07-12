@@ -41,7 +41,7 @@ export default function StatsCard({ name, records, selectedSports }) {
         <div style={{
           fontSize: 11, fontWeight: 800, letterSpacing: 3,
           color: "#cc0000",
-        }}>SCOREBOARD</div>
+        }}>KEEGOING</div>
         <div style={{ fontSize: 9, color: "#333", letterSpacing: 1 }}>
           scoreboard-neon-nine.vercel.app
         </div>

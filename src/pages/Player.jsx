@@ -58,13 +58,26 @@ export default function Player() {
         // Load Firestore profile
         try {
           const snap = await getDoc(doc(db, "users", u.uid));
-          if (snap.exists()) setProfile(snap.data());
+          const profileData = snap.exists() ? snap.data() : null;
+          if (profileData) setProfile(profileData);
 
           // Load records
           const rSnap = await getDocs(
             query(collection(db, "users", u.uid, "records"), orderBy("createdAt", "desc"), limit(20))
           );
-          setRecords(rSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+          let loadedRecords = rSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+          // 保存政策:免費版只顯示近一年(365天)內的紀錄,PRO版顯示全部;資料庫本身永久保留不刪除
+          const isPro = profileData?.plan === "pro";
+          if (!isPro) {
+            const oneYearAgo = Date.now() - 365 * 24 * 60 * 60 * 1000;
+            loadedRecords = loadedRecords.filter(r => {
+              const createdAt = r.createdAt?.toDate ? r.createdAt.toDate() : (r.createdAt ? new Date(r.createdAt) : null);
+              // 缺 createdAt 的舊資料不過濾,維持顯示(舊資料相容)
+              return !createdAt || createdAt.getTime() >= oneYearAgo;
+            });
+          }
+          setRecords(loadedRecords);
 
           // 讀取段位資料（各球類模式獨立計算，會自動偵測跨季並重置）
           const ranks = await getAllRankData(u.uid);
