@@ -105,7 +105,6 @@ export async function claimMatch(matchId, uid, { name, side }) {
       highestRankKey: rankResult.highestRankKey,
     },
     createdAt: serverTimestamp(),
-    expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // PRO: 30天, 免費: 14天
   });
 
   // 標記已認領(同時記錄到對應隊伍的 claims 陣列,供人數上限檢查用)
