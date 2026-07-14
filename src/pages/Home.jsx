@@ -8,10 +8,10 @@ import sportTabletennis from "../assets/icons/sport_tabletennis.png";
 import sportPickleball  from "../assets/icons/sport_pickleball.png";
 
 const SPORTS = [
-  { id: "basketball", icon: sportBasketball, emoji: "🏀", name: "籃球", nameEn: "BASKETBALL", accent: "#2f6fdb", score: "24", features: ["節次管理", "24秒進攻計時", "犯規記錄", "球權顯示"] },
-  { id: "badminton", icon: sportBadminton,  emoji: "🏸", name: "羽球", nameEn: "BADMINTON",  accent: "#1d4ed8", score: "21", features: ["單打 / 雙打", "21分制", "發球權", "局數記錄"] },
-  { id: "tabletennis", icon: sportTabletennis,emoji: "🏓", name: "桌球", nameEn: "TABLE TENNIS",accent: "#059669", score: "11", features: ["三局兩勝 / 五局三勝", "11分制", "單打"] },
   { id: "pickleball", icon: sportPickleball, emoji: "🥒", name: "匹克球",nameEn: "PICKLEBALL", accent: "#7c3aed", score: "11", features: ["單打 / 雙打", "傳統規則", "發球區提示", "一局 / 三局兩勝"] },
+  { id: "badminton", icon: sportBadminton,  emoji: "🏸", name: "羽球", nameEn: "BADMINTON",  accent: "#1d4ed8", score: "21", features: ["單打 / 雙打", "21分制", "發球權", "局數記錄"] },
+  { id: "basketball", icon: sportBasketball, emoji: "🏀", name: "籃球", nameEn: "BASKETBALL", accent: "#2f6fdb", score: "24", features: ["節次管理", "24秒進攻計時", "犯規記錄", "球權顯示"] },
+  { id: "tabletennis", icon: sportTabletennis,emoji: "🏓", name: "桌球", nameEn: "TABLE TENNIS",accent: "#059669", score: "11", features: ["三局兩勝 / 五局三勝", "11分制", "單打"] },
 ];
 
 function SportCard({ sport, onClick }) {
