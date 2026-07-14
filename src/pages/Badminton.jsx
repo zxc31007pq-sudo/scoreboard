@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MatchEndModal from "./MatchEndModal";
+import sportBadminton from "../assets/icons/sport_badminton.png";
 
 const AD_H = 56;
 const WIN_SCORE = 21;
@@ -228,7 +229,7 @@ export default function Badminton() {
           background:"#f0f0f0", border:"1px solid #ddd",
           color:"#888", cursor:"pointer",
         }}>← 首頁</button>
-        <div style={{fontSize:36}}>🏸</div>
+        <img src={sportBadminton} alt="羽球" style={{ width: 40, height: 40, objectFit: "contain" }} />
         <div style={{fontSize:16, fontWeight:800, letterSpacing:4, color:"#111"}}>羽球計分板</div>
 
         <div style={{display:"flex", gap:12}}>
