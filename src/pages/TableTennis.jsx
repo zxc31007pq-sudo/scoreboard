@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MatchEndModal from "./MatchEndModal";
+import sportTabletennis from "../assets/icons/sport_tabletennis.png";
 
 const AD_H = 56;
 const WIN_SCORE = 11;
@@ -197,7 +198,7 @@ export default function TableTennis() {
           color: "#888", cursor: "pointer",
         }}>← 首頁</button>
 
-        <div style={{ fontSize: 36 }}>🏓</div>
+        <img src={sportTabletennis} alt="桌球" style={{ width: 40, height: 40, objectFit: "contain" }} />
         <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: 4, color: "#111" }}>桌球計分板</div>
 
         {/* Format selection */}

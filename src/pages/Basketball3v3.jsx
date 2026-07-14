@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MatchEndModal from "./MatchEndModal";
+import sportBasketball from "../assets/icons/sport_basketball.png";
 
 const COLORS = ["#cc0000", "#1d4ed8"];
 const LIGHT_BG = ["#fff0f0", "#eef3ff"];
@@ -203,7 +204,7 @@ export default function Basketball3v3() {
           color: "#555", cursor: "pointer",
         }}>← 返回</button>
 
-        <div style={{ fontSize: 36 }}>🏀</div>
+        <img src={sportBasketball} alt="籃球" style={{ width: 40, height: 40, objectFit: "contain" }} />
         <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: 4, color: "#f0f0f0" }}>
           3 vs 3 籃球
         </div>

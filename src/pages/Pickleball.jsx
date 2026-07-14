@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MatchEndModal from "./MatchEndModal";
+import sportPickleball from "../assets/icons/sport_pickleball.png";
 
 const AD_H = 56;
 const WIN_SCORE = 11;
@@ -352,7 +353,7 @@ export default function Pickleball() {
           background: "#f0f0f0", border: "1px solid #ddd", color: "#888", cursor: "pointer",
         }}>← 首頁</button>
 
-        <div style={{ fontSize: 36 }}>🏓</div>
+        <img src={sportPickleball} alt="匹克球" style={{ width: 40, height: 40, objectFit: "contain" }} />
         <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: 4, color: "#111" }}>匹克球計分板</div>
 
         {/* Mode */}
