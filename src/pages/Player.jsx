@@ -24,7 +24,7 @@ function Avatar({ name, size = 56 }) {
   return (
     <div style={{
       width: size, height: size, borderRadius: size/2,
-      background: "linear-gradient(135deg, #2f6fdb, #7c3aed)",
+      background: "linear-gradient(135deg, #1F5BB1, #7c3aed)",
       display: "flex", alignItems: "center", justifyContent: "center",
       fontSize: size * 0.4, fontWeight: 900, color: "#fff", flexShrink: 0,
     }}>{name ? name[0].toUpperCase() : "?"}</div>
@@ -117,7 +117,7 @@ export default function Player() {
   if (loading) {
     return (
       <div style={{
-        height: "100vh", background: "#24262b",
+        height: "100vh", background: "#F0F5F2",
         display: "flex", alignItems: "center", justifyContent: "center",
         color: "#555", fontSize: 14, fontFamily: "'Noto Sans TC','Inter',sans-serif",
       }}>載入中...</div>
@@ -128,33 +128,33 @@ export default function Player() {
 
   return (
     <div style={{
-      height: "100vh", background: "#24262b",
+      height: "100vh", background: "#F0F5F2",
       fontFamily: "'Noto Sans TC','Inter','Helvetica Neue',sans-serif",
-      color: "#f0f0f0", display: "flex", flexDirection: "column", overflow: "hidden",
+      color: "#1A1A1A", display: "flex", flexDirection: "column", overflow: "hidden",
     }}>
       {/* Header */}
       <div style={{
-        height: 48, flexShrink: 0, background: "#202227",
-        borderBottom: "1px solid #383b42",
+        height: 48, flexShrink: 0, background: "#FFFFFF",
+        borderBottom: "1px solid #EEF8FF",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "0 16px",
       }}>
         <button onClick={() => navigate("/")} style={{
           padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
-          background: "#383b42", border: "1px solid #484b54", color: "#555", cursor: "pointer",
+          background: "#EEF8FF", border: "1px solid #C7D8CF", color: "#555", cursor: "pointer",
         }}>← 首頁</button>
 
-        <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 3, color: "#f0f0f0" }}>球員版</span>
+        <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 3, color: "#1A1A1A" }}>球員版</span>
 
         {user ? (
           <button onClick={handleSignOut} style={{
             padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
-            background: "#383b42", border: "1px solid #484b54", color: "#555", cursor: "pointer",
+            background: "#EEF8FF", border: "1px solid #C7D8CF", color: "#555", cursor: "pointer",
           }}>登出</button>
         ) : (
           <button onClick={() => navigate("/auth")} style={{
             padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
-            background: "#2f6fdb22", border: "1px solid #2f6fdb44", color: "#2f6fdb", cursor: "pointer",
+            background: "#1F5BB122", border: "1px solid #1F5BB144", color: "#1F5BB1", cursor: "pointer",
           }}>登入 / 註冊</button>
         )}
       </div>
@@ -177,8 +177,8 @@ export default function Player() {
 
       {/* Bottom Nav */}
       <div style={{
-        height: 60, flexShrink: 0, background: "#202227",
-        borderTop: "1px solid #383b42", display: "flex", alignItems: "center",
+        height: 60, flexShrink: 0, background: "#FFFFFF",
+        borderTop: "1px solid #EEF8FF", display: "flex", alignItems: "center",
       }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
@@ -189,8 +189,8 @@ export default function Player() {
             {t.img
               ? <img src={t.img} alt={t.label} style={{ width: 20, height: 20, objectFit: "contain" }} />
               : <span style={{ fontSize: 18 }}>{t.icon}</span>}
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: tab === t.key ? "#2f6fdb" : "#444" }}>{t.label}</span>
-            {tab === t.key && <div style={{ width: 20, height: 2, background: "#2f6fdb", borderRadius: 2 }} />}
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: tab === t.key ? "#1F5BB1" : "#444" }}>{t.label}</span>
+            {tab === t.key && <div style={{ width: 20, height: 2, background: "#1F5BB1", borderRadius: 2 }} />}
           </button>
         ))}
       </div>
@@ -225,17 +225,17 @@ function HomeTab({ user, profile, displayName, records, rankData, deleteQuota, n
       <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Guest preview */}
         <div style={{
-          background: "#2c2e33", border: "1px solid #40434b", borderRadius: 16, padding: "20px",
+          background: "#FFFFFF", border: "1px solid #DCE8E2", borderRadius: 16, padding: "20px",
           textAlign: "center",
         }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>👤</div>
-          <div style={{ fontSize: 18, fontWeight: 800, color: "#f0f0f0", marginBottom: 8 }}>球員版</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: "#1A1A1A", marginBottom: 8 }}>球員版</div>
           <div style={{ fontSize: 13, color: "#555", marginBottom: 20, lineHeight: 1.6 }}>
             記錄你的每場比賽<br/>段位積分・個人履歷卡
           </div>
           <button onClick={() => navigate("/auth")} style={{
             padding: "10px 32px", borderRadius: 10,
-            background: "#2f6fdb", border: "none",
+            background: "#1F5BB1", border: "none",
             color: "#fff", fontSize: 14, fontWeight: 800, cursor: "pointer",
           }}>登入 / 註冊</button>
         </div>
@@ -247,12 +247,12 @@ function HomeTab({ user, profile, displayName, records, rankData, deleteQuota, n
           { icon: "🎖️", title: "個人履歷卡", desc: "分享你的戰績到社群媒體" },
         ].map((f, i) => (
           <div key={i} style={{
-            background: "#2c2e33", border: "1px solid #40434b", borderRadius: 12,
+            background: "#FFFFFF", border: "1px solid #DCE8E2", borderRadius: 12,
             padding: "14px 16px", display: "flex", alignItems: "center", gap: 14,
           }}>
             <span style={{ fontSize: 28 }}>{f.icon}</span>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "#f0f0f0" }}>{f.title}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1A1A" }}>{f.title}</div>
               <div style={{ fontSize: 12, color: "#555", marginTop: 2 }}>{f.desc}</div>
             </div>
           </div>
@@ -265,7 +265,7 @@ function HomeTab({ user, profile, displayName, records, rankData, deleteQuota, n
     <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 16 }}>
       {/* Profile card */}
       <div style={{
-        background: "#2c2e33", border: "1px solid #40434b", borderRadius: 16, padding: "20px",
+        background: "#FFFFFF", border: "1px solid #DCE8E2", borderRadius: 16, padding: "20px",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
           <Avatar name={displayName} size={56} />
@@ -278,20 +278,20 @@ function HomeTab({ user, profile, displayName, records, rankData, deleteQuota, n
                   onChange={e => setNameInput(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && onSaveName()}
                   style={{
-                    background: "#383b42", border: "1px solid #2f6fdb",
-                    borderRadius: 8, color: "#f0f0f0", fontSize: 15,
+                    background: "#EEF8FF", border: "1px solid #1F5BB1",
+                    borderRadius: 8, color: "#1A1A1A", fontSize: 15,
                     padding: "4px 10px", outline: "none", flex: 1,
                     fontFamily: "inherit",
                   }}
                 />
                 <button onClick={onSaveName} style={{
                   padding: "4px 10px", borderRadius: 8, fontSize: 11, fontWeight: 700,
-                  background: "#2f6fdb", border: "none", color: "#fff", cursor: "pointer",
+                  background: "#1F5BB1", border: "none", color: "#fff", cursor: "pointer",
                 }}>儲存</button>
               </div>
             ) : (
               <div onClick={() => { setNameInput(displayName); setEditingName(true); }} style={{
-                fontSize: 18, fontWeight: 800, color: "#f0f0f0", cursor: "pointer",
+                fontSize: 18, fontWeight: 800, color: "#1A1A1A", cursor: "pointer",
                 display: "flex", alignItems: "center", gap: 6,
               }}>
                 {displayName}
@@ -309,8 +309,8 @@ function HomeTab({ user, profile, displayName, records, rankData, deleteQuota, n
           </div>
           <button onClick={onShareCard} style={{
             padding: "6px 14px", borderRadius: 8,
-            background: "#2f6fdb22", border: "1px solid #2f6fdb44",
-            color: "#2f6fdb", fontSize: 11, fontWeight: 700, cursor: "pointer",
+            background: "#1F5BB122", border: "1px solid #1F5BB144",
+            color: "#1F5BB1", fontSize: 11, fontWeight: 700, cursor: "pointer",
           }}>分享戰績卡</button>
         </div>
 
@@ -319,14 +319,14 @@ function HomeTab({ user, profile, displayName, records, rankData, deleteQuota, n
           {["全部", "籃球", "羽球", "匹克球", "桌球"].map(f => (
             <button key={f} onClick={() => setStatFilter(f)} style={{
               padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700,
-              background: statFilter === f ? "#2f6fdb" : "#383b42",
-              border: `1px solid ${statFilter === f ? "#2f6fdb" : "#484b54"}`,
+              background: statFilter === f ? "#1F5BB1" : "#EEF8FF",
+              border: `1px solid ${statFilter === f ? "#1F5BB1" : "#C7D8CF"}`,
               color: statFilter === f ? "#fff" : "#555", cursor: "pointer",
             }}>{f}</button>
           ))}
         </div>
         {/* Stats */}
-        <div style={{ display: "flex", borderTop: "1px solid #40434b", paddingTop: 14 }}>
+        <div style={{ display: "flex", borderTop: "1px solid #DCE8E2", paddingTop: 14 }}>
           {[
             { label: "場次", value: totalFiltered },
             { label: "勝場",  value: wins },
@@ -335,9 +335,9 @@ function HomeTab({ user, profile, displayName, records, rankData, deleteQuota, n
           ].map((s, i) => (
             <div key={i} style={{
               flex: 1, textAlign: "center",
-              borderRight: i < 3 ? "1px solid #40434b" : "none",
+              borderRight: i < 3 ? "1px solid #DCE8E2" : "none",
             }}>
-              <div style={{ fontSize: 20, fontWeight: 900, color: "#f0f0f0", fontFamily: "'Courier New',monospace" }}>{s.value}</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: "#1A1A1A", fontFamily: "'Courier New',monospace" }}>{s.value}</div>
               <div style={{ fontSize: 10, color: "#555", marginTop: 2 }}>{s.label}</div>
             </div>
           ))}
@@ -347,11 +347,11 @@ function HomeTab({ user, profile, displayName, records, rankData, deleteQuota, n
       {/* Recent records */}
       {records.length === 0 ? (
         <div style={{
-          background: "#2c2e33", border: "1px dashed #40434b", borderRadius: 14,
+          background: "#FFFFFF", border: "1px dashed #DCE8E2", borderRadius: 14,
           padding: "24px", textAlign: "center",
         }}>
           <div style={{ fontSize: 32, marginBottom: 8 }}>🏅</div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: "#f0f0f0", marginBottom: 6 }}>還沒有比賽紀錄</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1A1A", marginBottom: 6 }}>還沒有比賽紀錄</div>
           <div style={{ fontSize: 12, color: "#555" }}>打完比賽後掃 QR Code 認領紀錄</div>
         </div>
       ) : (
@@ -424,7 +424,7 @@ function RecordRow({ record, user, deleteQuota, onUpdate }) {
 
   return (
     <div style={{
-      background: "#2c2e33", border: "1px solid #40434b", borderRadius: 10,
+      background: "#FFFFFF", border: "1px solid #DCE8E2", borderRadius: 10,
       padding: "12px 14px",
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -432,7 +432,7 @@ function RecordRow({ record, user, deleteQuota, onUpdate }) {
           ? <img src={sportIcon} alt={record.sport} style={{ width: 22, height: 22, objectFit: "contain", flexShrink: 0 }} />
           : <span style={{ fontSize: 20 }}>🏅</span>}
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#f0f0f0" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#1A1A1A" }}>
             {record.sport === "basketball" ? "籃球" : record.sport === "badminton" ? "羽球" : record.sport === "tabletennis" ? "桌球" : "匹克球"} {record.mode}
           </div>
           <div style={{ fontSize: 10, color: "#555", marginTop: 2 }}>
@@ -449,14 +449,14 @@ function RecordRow({ record, user, deleteQuota, onUpdate }) {
           {editable && (
             <button onClick={() => setEditing(!editing)} style={{
               padding: "3px 8px", borderRadius: 6, fontSize: 10, fontWeight: 700,
-              background: "#383b42", border: "1px solid #484b54",
+              background: "#EEF8FF", border: "1px solid #C7D8CF",
               color: "#555", cursor: "pointer",
             }}>修改</button>
           )}
           {deletable && (
             <button onClick={() => setShowDeleteInfo(true)} style={{
               padding: "3px 8px", borderRadius: 6, fontSize: 10, fontWeight: 700,
-              background: "#383b42", border: "1px solid #484b54",
+              background: "#EEF8FF", border: "1px solid #C7D8CF",
               color: "#ef4444", cursor: "pointer",
             }}>刪除</button>
           )}
@@ -465,7 +465,7 @@ function RecordRow({ record, user, deleteQuota, onUpdate }) {
 
       {editable && (
         <div style={{
-          marginTop: 10, paddingTop: 10, borderTop: "1px solid #383b42",
+          marginTop: 10, paddingTop: 10, borderTop: "1px solid #EEF8FF",
           display: "flex", alignItems: "center", gap: 8,
         }}>
           <span style={{ fontSize: 10, color: "#444", flexShrink: 0 }}>📲 分享給隊友（3小時內有效）</span>
@@ -475,23 +475,23 @@ function RecordRow({ record, user, deleteQuota, onUpdate }) {
           }}>{shareUrl}</div>
           <button onClick={handleCopyShareLink} style={{
             padding: "3px 10px", borderRadius: 6, fontSize: 10, fontWeight: 700,
-            background: linkCopied ? "#14532d" : "#383b42",
-            border: `1px solid ${linkCopied ? "#22c55e" : "#484b54"}`,
+            background: linkCopied ? "#14532d" : "#EEF8FF",
+            border: `1px solid ${linkCopied ? "#22c55e" : "#C7D8CF"}`,
             color: linkCopied ? "#22c55e" : "#888", cursor: "pointer", flexShrink: 0,
           }}>{linkCopied ? "✓ 已複製" : "複製"}</button>
         </div>
       )}
 
       {editing && (
-        <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #383b42" }}>
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #EEF8FF" }}>
           <div style={{ fontSize: 11, color: "#555", marginBottom: 8 }}>選擇正確的隊伍：</div>
           <div style={{ display: "flex", gap: 8 }}>
             {["A", "B"].map(side => (
               <button key={side} onClick={() => handleUpdate(side)} disabled={updating} style={{
                 flex: 1, padding: "8px 0", borderRadius: 8, fontSize: 12, fontWeight: 700,
-                background: record.side === side ? "#2f6fdb22" : "#383b42",
-                border: `1px solid ${record.side === side ? "#2f6fdb" : "#484b54"}`,
-                color: record.side === side ? "#2f6fdb" : "#555",
+                background: record.side === side ? "#1F5BB122" : "#EEF8FF",
+                border: `1px solid ${record.side === side ? "#1F5BB1" : "#C7D8CF"}`,
+                color: record.side === side ? "#1F5BB1" : "#555",
                 cursor: updating ? "not-allowed" : "pointer",
               }}>
                 {side === "A" ? "主隊" : "客隊"} {record.side === side ? "（目前）" : ""}
@@ -511,20 +511,20 @@ function RecordRow({ record, user, deleteQuota, onUpdate }) {
         }}>
           <div style={{
             width: "100%", maxWidth: 360,
-            background: "#2c2e33", border: "1px solid #40434b",
+            background: "#FFFFFF", border: "1px solid #DCE8E2",
             borderRadius: 20, padding: "24px 20px",
             display: "flex", flexDirection: "column", gap: 14,
           }}>
             <div style={{ textAlign: "center" }}>
               <div style={{ fontSize: 32, marginBottom: 8 }}>🗑️</div>
-              <div style={{ fontSize: 15, fontWeight: 900, color: "#f0f0f0", marginBottom: 6 }}>確認刪除這場紀錄？</div>
+              <div style={{ fontSize: 15, fontWeight: 900, color: "#1A1A1A", marginBottom: 6 }}>確認刪除這場紀錄？</div>
             </div>
 
             <div style={{
-              background: "#24262b", borderRadius: 10, padding: "12px 14px",
+              background: "#F0F5F2", borderRadius: 10, padding: "12px 14px",
               fontSize: 11, color: "#888", lineHeight: 1.8,
             }}>
-              • 免費版每季（1/4/7/10月）最多可刪除 <strong style={{ color: "#f0f0f0" }}>{deleteQuota?.limit ?? 3} 場</strong>，本季已使用 <strong style={{ color: "#f0f0f0" }}>{deleteQuota?.used ?? 0}/{deleteQuota?.limit ?? 3}</strong><br/>
+              • 免費版每季（1/4/7/10月）最多可刪除 <strong style={{ color: "#1A1A1A" }}>{deleteQuota?.limit ?? 3} 場</strong>，本季已使用 <strong style={{ color: "#1A1A1A" }}>{deleteQuota?.used ?? 0}/{deleteQuota?.limit ?? 3}</strong><br/>
               • 只能刪除該模式「最新一筆」紀錄，積分與連勝會正確扣回<br/>
               • 刪除後無法復原，且無法再次認領同一場比賽
             </div>
@@ -546,7 +546,7 @@ function RecordRow({ record, user, deleteQuota, onUpdate }) {
             <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => { setShowDeleteInfo(false); setDeleteError(""); }} disabled={deleting} style={{
                 flex: 1, padding: "11px 0", borderRadius: 10,
-                background: "#383b42", border: "1px solid #484b54",
+                background: "#EEF8FF", border: "1px solid #C7D8CF",
                 color: "#555", fontSize: 13, cursor: "pointer",
               }}>取消</button>
               <button onClick={handleDelete} disabled={deleting || quotaExhausted} style={{
@@ -576,7 +576,7 @@ function RecordsTab({ user, records, deleteQuota, navigate }) {
         <div style={{ fontSize: 32, margin: "32px 0 12px" }}>📋</div>
         <div style={{ fontSize: 14, color: "#555", marginBottom: 16 }}>登入後查看比賽紀錄</div>
         <button onClick={() => navigate("/auth")} style={{
-          padding: "8px 24px", borderRadius: 10, background: "#2f6fdb",
+          padding: "8px 24px", borderRadius: 10, background: "#1F5BB1",
           border: "none", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer",
         }}>登入 / 註冊</button>
       </div>
@@ -587,11 +587,11 @@ function RecordsTab({ user, records, deleteQuota, navigate }) {
     <div style={{ padding: 16 }}>
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: "#2c2e33", border: "1px solid #40434b", borderRadius: 10,
+        background: "#FFFFFF", border: "1px solid #DCE8E2", borderRadius: 10,
         padding: "8px 14px", marginBottom: 12, fontSize: 11, color: "#555",
       }}>
         <span>本季刪除額度</span>
-        <span style={{ color: (deleteQuota?.remaining ?? 3) <= 0 ? "#ef4444" : "#f0f0f0", fontWeight: 700 }}>
+        <span style={{ color: (deleteQuota?.remaining ?? 3) <= 0 ? "#ef4444" : "#1A1A1A", fontWeight: 700 }}>
           {deleteQuota?.used ?? 0} / {deleteQuota?.limit ?? 3}
         </span>
       </div>
@@ -599,8 +599,8 @@ function RecordsTab({ user, records, deleteQuota, navigate }) {
         {filters.map(f => (
           <button key={f} onClick={() => setFilter(f)} style={{
             padding: "5px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700,
-            background: filter === f ? "#2f6fdb" : "#383b42",
-            border: `1px solid ${filter === f ? "#2f6fdb" : "#484b54"}`,
+            background: filter === f ? "#1F5BB1" : "#EEF8FF",
+            border: `1px solid ${filter === f ? "#1F5BB1" : "#C7D8CF"}`,
             color: filter === f ? "#fff" : "#555",
             cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0,
           }}>{f}</button>
@@ -630,7 +630,7 @@ function RankTab({ user, rankData, navigate }) {
         <div style={{ fontSize: 32, margin: "32px 0 12px" }}>🏅</div>
         <div style={{ fontSize: 14, color: "#555", marginBottom: 16 }}>登入後查看段位</div>
         <button onClick={() => navigate("/auth")} style={{
-          padding: "8px 24px", borderRadius: 10, background: "#2f6fdb",
+          padding: "8px 24px", borderRadius: 10, background: "#1F5BB1",
           border: "none", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer",
         }}>登入 / 註冊</button>
       </div>
@@ -662,11 +662,11 @@ function RankTab({ user, rankData, navigate }) {
       <div style={{ fontSize: 11, color: "#444", letterSpacing: 2, marginBottom: 4 }}>本季段位</div>
       {modes.length === 0 && (
         <div style={{
-          background: "#2c2e33", border: "1px dashed #40434b", borderRadius: 14,
+          background: "#FFFFFF", border: "1px dashed #DCE8E2", borderRadius: 14,
           padding: "24px", textAlign: "center",
         }}>
           <div style={{ fontSize: 32, marginBottom: 8 }}>🏅</div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: "#f0f0f0", marginBottom: 6 }}>還沒有段位資料</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1A1A", marginBottom: 6 }}>還沒有段位資料</div>
           <div style={{ fontSize: 12, color: "#555" }}>認領一場比賽後，該球類的段位就會出現在這裡</div>
         </div>
       )}
@@ -678,10 +678,10 @@ function RankTab({ user, rankData, navigate }) {
           : 100;
         return (
           <div key={r.key} style={{
-            background: "#2c2e33", border: "1px solid #40434b", borderRadius: 12, padding: "14px 16px",
+            background: "#FFFFFF", border: "1px solid #DCE8E2", borderRadius: 12, padding: "14px 16px",
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: "#f0f0f0" }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#1A1A1A" }}>
                 {r.label} {r.mode}
                 {r.streak >= 3 && (
                   <span style={{ marginLeft: 6, fontSize: 10, color: "#f97316", display: "inline-flex", alignItems: "center", gap: 3 }}>
@@ -698,7 +698,7 @@ function RankTab({ user, rankData, navigate }) {
                 <span style={{ fontSize: 13, fontWeight: 700, color: rank.color }}>{rank.name}</span>
               </div>
             </div>
-            <div style={{ height: 4, background: "#40434b", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ height: 4, background: "#DCE8E2", borderRadius: 2, overflow: "hidden" }}>
               <div style={{
                 height: "100%", background: rank.color,
                 width: `${progress}%`, borderRadius: 2,
@@ -713,10 +713,10 @@ function RankTab({ user, rankData, navigate }) {
         );
       })}
       <div style={{
-        background: "#2c2e33", border: "1px solid #40434b", borderRadius: 12,
+        background: "#FFFFFF", border: "1px solid #DCE8E2", borderRadius: 12,
         padding: "12px 16px", textAlign: "center",
       }}>
-        <div style={{ fontSize: 11, color: "#555" }}>本季結束於 <span style={{ color: "#f0f0f0", fontWeight: 700 }}>{
+        <div style={{ fontSize: 11, color: "#555" }}>本季結束於 <span style={{ color: "#1A1A1A", fontWeight: 700 }}>{
           (() => {
             const { seasonEndDate } = getNextResetInfo();
             return `${seasonEndDate.getFullYear()}/${String(seasonEndDate.getMonth()+1).padStart(2,"0")}/${String(seasonEndDate.getDate()).padStart(2,"0")}`;
@@ -768,7 +768,7 @@ function ProfileTab({ user, profile, displayName, onSignOut, navigate }) {
         <div style={{ fontSize: 32, margin: "32px 0 12px" }}>👤</div>
         <div style={{ fontSize: 14, color: "#555", marginBottom: 16 }}>登入後管理個人資料</div>
         <button onClick={() => navigate("/auth")} style={{
-          padding: "8px 24px", borderRadius: 10, background: "#2f6fdb",
+          padding: "8px 24px", borderRadius: 10, background: "#1F5BB1",
           border: "none", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer",
         }}>登入 / 註冊</button>
       </div>
@@ -779,24 +779,24 @@ function ProfileTab({ user, profile, displayName, onSignOut, navigate }) {
     <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 14 }}>
       {/* Avatar & name */}
       <div style={{
-        background: "#2c2e33", border: "1px solid #40434b", borderRadius: 14,
+        background: "#FFFFFF", border: "1px solid #DCE8E2", borderRadius: 14,
         padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
       }}>
         <Avatar name={displayName} size={72} />
-        <div style={{ fontSize: 18, fontWeight: 800, color: "#f0f0f0" }}>{displayName}</div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: "#1A1A1A" }}>{displayName}</div>
         <div style={{ fontSize: 12, color: "#555" }}>{user.email}</div>
         <div style={{
-          fontSize: 10, background: "#2f6fdb22", border: "1px solid #2f6fdb44",
-          borderRadius: 4, padding: "2px 8px", color: "#2f6fdb",
+          fontSize: 10, background: "#1F5BB122", border: "1px solid #1F5BB144",
+          borderRadius: 4, padding: "2px 8px", color: "#1F5BB1",
         }}>免費版</div>
       </div>
 
       {/* Account */}
-      <div style={{ background: "#2c2e33", border: "1px solid #40434b", borderRadius: 14, padding: "16px" }}>
+      <div style={{ background: "#FFFFFF", border: "1px solid #DCE8E2", borderRadius: 14, padding: "16px" }}>
         <div style={{ fontSize: 12, color: "#555", letterSpacing: 2, marginBottom: 12 }}>帳號管理</div>
         <div onClick={onSignOut} style={{
-          padding: "12px 0", borderBottom: "1px solid #383b42",
-          fontSize: 13, fontWeight: 600, color: "#f0f0f0", cursor: "pointer",
+          padding: "12px 0", borderBottom: "1px solid #EEF8FF",
+          fontSize: 13, fontWeight: 600, color: "#1A1A1A", cursor: "pointer",
         }}>登出</div>
         <div onClick={() => setDelConfirm(true)} style={{
           padding: "12px 0",
@@ -813,13 +813,13 @@ function ProfileTab({ user, profile, displayName, onSignOut, navigate }) {
         }}>
           <div style={{
             width: "100%", maxWidth: 360,
-            background: "#2c2e33", border: "1px solid #40434b",
+            background: "#FFFFFF", border: "1px solid #DCE8E2",
             borderRadius: 20, padding: "28px 24px",
             display: "flex", flexDirection: "column", gap: 14,
           }}>
             <div style={{ textAlign: "center" }}>
               <div style={{ fontSize: 36, marginBottom: 8 }}>⚠️</div>
-              <div style={{ fontSize: 16, fontWeight: 900, color: "#f0f0f0", marginBottom: 6 }}>確認刪除帳號</div>
+              <div style={{ fontSize: 16, fontWeight: 900, color: "#1A1A1A", marginBottom: 6 }}>確認刪除帳號</div>
               <div style={{ fontSize: 12, color: "#555", lineHeight: 1.7 }}>
                 此操作無法復原。<br/>
                 所有比賽紀錄、段位積分將永久刪除。<br/>
@@ -835,7 +835,7 @@ function ProfileTab({ user, profile, displayName, onSignOut, navigate }) {
             <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => { setDelConfirm(false); setDelError(""); }} disabled={deleting} style={{
                 flex: 1, padding: "11px 0", borderRadius: 10,
-                background: "#383b42", border: "1px solid #484b54",
+                background: "#EEF8FF", border: "1px solid #C7D8CF",
                 color: "#555", fontSize: 13, cursor: "pointer",
               }}>取消</button>
               <button onClick={handleDeleteAccount} disabled={deleting} style={{
