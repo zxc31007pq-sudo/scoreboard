@@ -649,15 +649,27 @@ function RankTab({ user, rankData, navigate }) {
     tabletennis_桌球:   { label: "桌球",   mode: "桌球" },
   };
 
-  // 顯示所有已知模式，沒打過的顯示 0 分新手
-  const modes = Object.entries(MODE_LABELS).map(([key, info]) => {
-    const found = rankData.find(r => r.modeKey === key);
-    return { key, ...info, pts: found?.pts || 0, streak: found?.streak || 0 };
-  });
+  // 只顯示已認領過比賽的球類模式(rankData 有對應資料才會出現),未認領過的不顯示
+  const modes = Object.entries(MODE_LABELS)
+    .map(([key, info]) => {
+      const found = rankData.find(r => r.modeKey === key);
+      return found ? { key, ...info, pts: found.pts || 0, streak: found.streak || 0 } : null;
+    })
+    .filter(Boolean);
 
   return (
     <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
       <div style={{ fontSize: 11, color: "#444", letterSpacing: 2, marginBottom: 4 }}>本季段位</div>
+      {modes.length === 0 && (
+        <div style={{
+          background: "#2c2e33", border: "1px dashed #40434b", borderRadius: 14,
+          padding: "24px", textAlign: "center",
+        }}>
+          <div style={{ fontSize: 32, marginBottom: 8 }}>🏅</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#f0f0f0", marginBottom: 6 }}>還沒有段位資料</div>
+          <div style={{ fontSize: 12, color: "#555" }}>認領一場比賽後，該球類的段位就會出現在這裡</div>
+        </div>
+      )}
       {modes.map((r) => {
         const rank = getRank(r.pts);
         const next = RANK_SYSTEM.find(rs => rs.min > r.pts);
