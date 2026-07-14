@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { createMatch } from "../matchService";
+import sportBasketball  from "../assets/icons/sport_basketball.png";
+import sportBadminton   from "../assets/icons/sport_badminton.png";
+import sportTabletennis from "../assets/icons/sport_tabletennis.png";
+import sportPickleball  from "../assets/icons/sport_pickleball.png";
 
 // 快速計分模式:跳過即時計分,直接輸入比賽最終結果,建立比賽後導向認領頁
 // 各球類的 mode 字串與分數語意,必須跟對應計分板傳給 MatchEndModal 的值完全一致:
 //   籃球 5v5/3v3 → 最終比分;桌球(mode固定"桌球")/羽球(單打/雙打) → 局數比;匹克球(單打/雙打) → 最終比分
 const SPORT_CONFIG = {
-  basketball:  { icon: "🏀", name: "籃球",   modes: ["5v5", "3v3"],  scoreType: "score", defaults: ["主隊", "客隊"] },
-  badminton:   { icon: "🏸", name: "羽球",   modes: ["單打", "雙打"], scoreType: "sets",  defaults: ["左隊", "右隊"] },
-  tabletennis: { icon: "🏓", name: "桌球",   modes: ["桌球"],         scoreType: "sets",  defaults: ["左方", "右方"] },
-  pickleball:  { icon: "🥒", name: "匹克球", modes: ["單打", "雙打"], scoreType: "score", defaults: ["左方", "右方"] },
+  basketball:  { icon: sportBasketball,  name: "籃球",   modes: ["5v5", "3v3"],  scoreType: "score", defaults: ["主隊", "客隊"] },
+  badminton:   { icon: sportBadminton,   name: "羽球",   modes: ["單打", "雙打"], scoreType: "sets",  defaults: ["左隊", "右隊"] },
+  tabletennis: { icon: sportTabletennis, name: "桌球",   modes: ["桌球"],         scoreType: "sets",  defaults: ["左方", "右方"] },
+  pickleball:  { icon: sportPickleball,  name: "匹克球", modes: ["單打", "雙打"], scoreType: "score", defaults: ["左方", "右方"] },
 };
 
 export default function QuickRecord() {
@@ -93,7 +97,7 @@ export default function QuickRecord() {
 
         {/* Title */}
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 32, marginBottom: 6 }}>{cfg.icon}</div>
+          <img src={cfg.icon} alt={cfg.name} style={{ width: 40, height: 40, objectFit: "contain", marginBottom: 6 }} />
           <div style={{ fontSize: 18, fontWeight: 900, color: "#f0f0f0" }}>
             快速計分{modeLocked ? ` · ${cfg.name}${mode !== cfg.name ? ` ${mode}` : ""}` : ` · ${cfg.name}`}
           </div>
