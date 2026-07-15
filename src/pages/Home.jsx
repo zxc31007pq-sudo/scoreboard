@@ -77,7 +77,7 @@ export default function Homepage() {
         }}>
           {[
             { key: "scoreboard", label: "⚡ 計分板" },
-            { key: "player",     label: "👤 球員版" },
+            { key: "player",     label: "👤 個人" },
           ].map(t => (
             <button key={t.key} onClick={() => t.key === "player" ? navigate("/player") : setTab(t.key)} style={{
               padding: "5px 14px", borderRadius: 8, fontSize: 11, fontWeight: 700,
@@ -148,8 +148,8 @@ export default function Homepage() {
             fontSize: 22,
           }}>👤</div>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: "#0F172A", marginBottom: 4 }}>球員版</div>
-            <div style={{ fontSize: 11, color: "#64748B" }}>紀錄你的每場比賽・段位積分・個人履歷卡</div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: "#0F172A", marginBottom: 4 }}>個人</div>
+            <div style={{ fontSize: 11, color: "#64748B" }}>紀錄你的每場比賽・段位積分・個人戰績卡</div>
           </div>
         </div>
         <div style={{ fontSize: 18, color: "#94A3B8" }}>→</div>
