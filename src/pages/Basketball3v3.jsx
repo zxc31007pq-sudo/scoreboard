@@ -101,7 +101,7 @@ function ScoreCard({ score, color, lightBg, name, limit, onScore, onUndo,
           userSelect: "none", position: "relative",
         }}>
         <span style={{
-          fontSize: "22vw", fontWeight: 900, color,
+          fontSize: "min(22vw, 30vh)", fontWeight: 900, color,
           fontFamily: "'Bebas Neue', sans-serif",
           letterSpacing: "-0.05em", lineHeight: 1,
           userSelect: "none",

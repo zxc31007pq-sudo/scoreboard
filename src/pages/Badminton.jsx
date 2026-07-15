@@ -92,7 +92,7 @@ function ScoreCard({ score, color, lightBg, serving, name, onScore, onUndo,
 
         {/* Score number — fills the card */}
         <span style={{
-          fontSize:"22vw",
+          fontSize:"min(22vw, 30vh)",
           fontWeight:900,
           color: serving ? "#fff" : color,
           fontFamily:"'Bebas Neue', sans-serif",

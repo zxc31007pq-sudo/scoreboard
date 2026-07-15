@@ -155,7 +155,7 @@ function ScoreCard({ score, color, lightBg, serving, name, onScore, onUndo,
         )}
 
         <span style={{
-          fontSize: "22vw",
+          fontSize: "min(22vw, 30vh)",
           fontWeight: 900,
           color: serving ? color : "#ccc",
           fontFamily: "'Bebas Neue', sans-serif",
