@@ -96,7 +96,8 @@ function ModeCard({ label, sub, desc, color, court, onClick }) {
     >
       {/* Court diagram */}
       <div style={{
-        background: "#0a0a0a", borderRadius: 12,
+        background: "#D9B382", borderRadius: 12,
+        border: "3px solid #F97316",
         padding: "20px", display: "flex",
         alignItems: "center", justifyContent: "center",
         height: 160, minWidth: 0, overflow: "hidden",
@@ -143,34 +144,32 @@ function ModeCard({ label, sub, desc, color, court, onClick }) {
 
 // Full court diagram for 5v5
 function Court5v5() {
-  const s = "#1a1a1a"; // stroke
-  const a = "#cc000066"; // accent
+  const s = "#1D4ED8"; // stroke:戰術板藍色場線
   return (
     <svg width="200" height="120" viewBox="0 0 200 120" style={{ width: "100%", height: "auto", maxWidth: 200 }}>
       {/* Court outline */}
-      <rect x="4" y="4" width="192" height="112" rx="4" fill="none" stroke={s} strokeWidth="1.5" />
+      <rect x="4" y="4" width="192" height="112" rx="4" fill="none" stroke={s} strokeWidth="2" />
       {/* Center line */}
-      <line x1="100" y1="4" x2="100" y2="116" stroke={s} strokeWidth="1" />
+      <line x1="100" y1="4" x2="100" y2="116" stroke={s} strokeWidth="1.5" />
       {/* Center circle */}
-      <circle cx="100" cy="60" r="18" fill="none" stroke={s} strokeWidth="1" />
+      <circle cx="100" cy="60" r="18" fill="none" stroke={s} strokeWidth="1.5" />
       {/* Left key */}
-      <rect x="4" y="30" width="40" height="60" fill={a} stroke={s} strokeWidth="1" />
-      <semicircle />
-      <path d="M 44 30 A 20 20 0 0 1 44 90" fill="none" stroke={s} strokeWidth="1" />
+      <rect x="4" y="30" width="40" height="60" fill="none" stroke={s} strokeWidth="1.5" />
+      <path d="M 44 30 A 20 20 0 0 1 44 90" fill="none" stroke={s} strokeWidth="1.5" />
       {/* Right key */}
-      <rect x="156" y="30" width="40" height="60" fill={a} stroke={s} strokeWidth="1" />
-      <path d="M 156 30 A 20 20 0 0 0 156 90" fill="none" stroke={s} strokeWidth="1" />
+      <rect x="156" y="30" width="40" height="60" fill="none" stroke={s} strokeWidth="1.5" />
+      <path d="M 156 30 A 20 20 0 0 0 156 90" fill="none" stroke={s} strokeWidth="1.5" />
       {/* Left 3pt */}
-      <path d="M 4 15 A 55 55 0 0 1 4 105" fill="none" stroke={s} strokeWidth="1" strokeDasharray="3,2" />
+      <path d="M 4 15 A 55 55 0 0 1 4 105" fill="none" stroke={s} strokeWidth="1.5" strokeDasharray="3,2" />
       {/* Right 3pt */}
-      <path d="M 196 15 A 55 55 0 0 0 196 105" fill="none" stroke={s} strokeWidth="1" strokeDasharray="3,2" />
-      {/* Players left */}
+      <path d="M 196 15 A 55 55 0 0 0 196 105" fill="none" stroke={s} strokeWidth="1.5" strokeDasharray="3,2" />
+      {/* Players left(紅隊) */}
       {[[25,40],[25,80],[55,30],[55,90],[70,60]].map(([x,y],i) => (
-        <circle key={i} cx={x} cy={y} r="4" fill="#cc0000" opacity="0.8" />
+        <circle key={i} cx={x} cy={y} r="4.5" fill="#cc0000" stroke="#fff" strokeWidth="1" />
       ))}
-      {/* Players right */}
+      {/* Players right(黃隊) */}
       {[[175,40],[175,80],[145,30],[145,90],[130,60]].map(([x,y],i) => (
-        <circle key={i} cx={x} cy={y} r="4" fill="#334155" opacity="0.8" />
+        <circle key={i} cx={x} cy={y} r="4.5" fill="#FACC15" stroke="#fff" strokeWidth="1" />
       ))}
     </svg>
   );
@@ -178,29 +177,28 @@ function Court5v5() {
 
 // Half court diagram for 3v3
 function Court3v3() {
-  const s = "#1a1a1a";
-  const a = "#f9731622";
+  const s = "#1D4ED8"; // stroke:戰術板藍色場線
   return (
     <svg width="160" height="120" viewBox="0 0 160 120" style={{ width: "100%", height: "auto", maxWidth: 160 }}>
       {/* Half court */}
-      <rect x="4" y="4" width="152" height="112" rx="4" fill="none" stroke={s} strokeWidth="1.5" />
+      <rect x="4" y="4" width="152" height="112" rx="4" fill="none" stroke={s} strokeWidth="2" />
       {/* Key */}
-      <rect x="4" y="30" width="52" height="60" fill={a} stroke={s} strokeWidth="1" />
-      <path d="M 56 30 A 25 25 0 0 1 56 90" fill="none" stroke={s} strokeWidth="1" />
+      <rect x="4" y="30" width="52" height="60" fill="none" stroke={s} strokeWidth="1.5" />
+      <path d="M 56 30 A 25 25 0 0 1 56 90" fill="none" stroke={s} strokeWidth="1.5" />
       {/* 3pt arc */}
-      <path d="M 4 8 A 75 75 0 0 1 4 112" fill="none" stroke={s} strokeWidth="1" strokeDasharray="3,2" />
+      <path d="M 4 8 A 75 75 0 0 1 4 112" fill="none" stroke={s} strokeWidth="1.5" strokeDasharray="3,2" />
       {/* Basket */}
       <circle cx="16" cy="60" r="5" fill="none" stroke="#f97316" strokeWidth="1.5" />
       <line x1="4" y1="60" x2="21" y2="60" stroke="#f97316" strokeWidth="1" />
       {/* Players */}
       {[[80,35],[80,85],[110,60]].map(([x,y],i) => (
-        <circle key={i} cx={x} cy={y} r="5" fill="#f97316" opacity="0.8" />
+        <circle key={i} cx={x} cy={y} r="5" fill="#f97316" stroke="#fff" strokeWidth="1" />
       ))}
       {[[40,35],[40,85],[60,60]].map(([x,y],i) => (
-        <circle key={i} cx={x} cy={y} r="5" fill="#334155" opacity="0.8" />
+        <circle key={i} cx={x} cy={y} r="5" fill="#334155" stroke="#fff" strokeWidth="1" />
       ))}
       {/* Half court label */}
-      <text x="120" y="115" fontSize="8" fill="#333" textAnchor="middle">半場</text>
+      <text x="120" y="115" fontSize="8" fill="#5c4425" textAnchor="middle">半場</text>
     </svg>
   );
 }
