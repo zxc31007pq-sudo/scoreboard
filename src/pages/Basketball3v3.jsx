@@ -287,12 +287,13 @@ export default function Basketball3v3() {
 
       {/* Header */}
       <div style={{
-        height: 46, flexShrink: 0, background: "#fff",
+        minHeight: 46, flexShrink: 0, background: "#fff",
         borderBottom: "1px solid #e0e0e0",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 16px",
+        flexWrap: "wrap", rowGap: 6, columnGap: 8,
+        padding: "8px 16px",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flexWrap: "wrap", rowGap: 4 }}>
           <button onClick={() => navigate("/basketball-select")} style={{
             padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
             background: "#f0f0f0", border: "1px solid #ddd", color: "#888", cursor: "pointer",
@@ -307,15 +308,17 @@ export default function Basketball3v3() {
           }}>先得 {limit} 分勝</span>
         </div>
 
-        <button onClick={() => setShowMatchEnd(true)} style={{
-          fontSize: 11, padding: "4px 12px", borderRadius: 6,
-          background: "#cc000022", border: "1px solid #cc000044",
-          color: "#cc0000", cursor: "pointer", marginRight: 8,
-        }}>結束比賽</button>
-        <button onClick={reset} style={{
-          fontSize: 11, padding: "4px 12px", borderRadius: 6,
-          background: "#f5f5f5", border: "1px solid #ddd", color: "#888", cursor: "pointer",
-        }}>重新設定</button>
+        <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+          <button onClick={() => setShowMatchEnd(true)} style={{
+            fontSize: 11, padding: "4px 12px", borderRadius: 6,
+            background: "#cc000022", border: "1px solid #cc000044",
+            color: "#cc0000", cursor: "pointer",
+          }}>結束比賽</button>
+          <button onClick={reset} style={{
+            fontSize: 11, padding: "4px 12px", borderRadius: 6,
+            background: "#f5f5f5", border: "1px solid #ddd", color: "#888", cursor: "pointer",
+          }}>重新設定</button>
+        </div>
       </div>
 
       {showMatchEnd && (

@@ -264,12 +264,13 @@ export default function TableTennis() {
 
       {/* HEADER */}
       <div style={{
-        height: 46, flexShrink: 0, background: "#fff",
+        minHeight: 46, flexShrink: 0, background: "#fff",
         borderBottom: "1px solid #e0e0e0",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 16px",
+        flexWrap: "wrap", rowGap: 6, columnGap: 8,
+        padding: "8px 16px",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flexWrap: "wrap", rowGap: 4 }}>
           <button onClick={() => navigate("/")} style={{
             padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
             background: "#f0f0f0", border: "1px solid #ddd",
@@ -284,7 +285,7 @@ export default function TableTennis() {
         </div>
 
         {/* Set wins */}
-        <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 24, alignItems: "center", flexWrap: "wrap", rowGap: 4, minWidth: 0 }}>
           {[0, 1].map(i => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ fontSize: 12, color: COLORS[i], fontWeight: 700 }}>{names[i]}</span>
@@ -302,18 +303,20 @@ export default function TableTennis() {
           <span style={{ fontSize: 12, color: "#aaa" }}>第 {curSet + 1} 局</span>
         </div>
 
-        {winner !== null && (
-          <button onClick={() => setShowMatchEnd(true)} style={{
+        <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+          {winner !== null && (
+            <button onClick={() => setShowMatchEnd(true)} style={{
+              fontSize: 11, padding: "4px 12px", borderRadius: 6,
+              background: "#cc000022", border: "1px solid #cc000044",
+              color: "#cc0000", cursor: "pointer",
+            }}>結束比賽</button>
+          )}
+          <button onClick={() => { setSetupDone(false); setScores([[0, 0]]); setSetWins([0, 0]); setHistory([]); setAlert(null); }} style={{
             fontSize: 11, padding: "4px 12px", borderRadius: 6,
-            background: "#cc000022", border: "1px solid #cc000044",
-            color: "#cc0000", cursor: "pointer", marginRight: 6,
-          }}>結束比賽</button>
-        )}
-        <button onClick={() => { setSetupDone(false); setScores([[0, 0]]); setSetWins([0, 0]); setHistory([]); setAlert(null); }} style={{
-          fontSize: 11, padding: "4px 12px", borderRadius: 6,
-          background: "#f5f5f5", border: "1px solid #ddd",
-          color: "#888", cursor: "pointer",
-        }}>重新設定</button>
+            background: "#f5f5f5", border: "1px solid #ddd",
+            color: "#888", cursor: "pointer",
+          }}>重新設定</button>
+        </div>
       </div>
 
       {showMatchEnd && (
