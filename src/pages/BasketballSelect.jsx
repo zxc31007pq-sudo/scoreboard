@@ -96,7 +96,7 @@ function ModeCard({ label, sub, desc, color, court, onClick }) {
     >
       {/* Court diagram */}
       <div style={{
-        background: "#D9B382", borderRadius: 12,
+        background: "#EAD1A8", borderRadius: 12,
         border: "3px solid #F97316",
         padding: "20px", display: "flex",
         alignItems: "center", justifyContent: "center",
