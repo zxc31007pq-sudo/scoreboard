@@ -523,7 +523,7 @@ export default function Basketball() {
             background:"#0c0c0c",
             border: `4px solid ${shotUrgent ? (shotBlink ? "#fff" : "transparent") : "transparent"}`,
             transition: shotUrgent ? "none" : "border-color .3s",
-            overflow:"hidden",
+            overflowY:"auto", overflowX:"hidden",
           }}>
             <div style={{fontSize:11, color:"#444", letterSpacing:3, marginBottom:2}}>SHOT CLOCK</div>
             <div style={{
