@@ -5,7 +5,7 @@ export default function BasketballSelect() {
 
   return (
     <div style={{
-      height: "100vh", width: "100vw", maxWidth: "100vw", background: "#0a0a0a",
+      height: "100vh", width: "100vw", maxWidth: "100vw", background: "#F8FAFC",
       fontFamily: "'Noto Sans TC','Inter','Helvetica Neue',sans-serif",
       display: "flex", flexDirection: "column",
       overflowX: "hidden", overflowY: "auto",
@@ -14,13 +14,13 @@ export default function BasketballSelect() {
       {/* Header */}
       <div style={{
         height: 48, flexShrink: 0,
-        background: "#0d0d0d", borderBottom: "1px solid #1a1a1a",
+        background: "#FFFFFF", borderBottom: "1px solid #F1F5F9",
         display: "flex", alignItems: "center", padding: "0 16px", gap: 12,
       }}>
         <button onClick={() => navigate("/")} style={{
           padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
-          background: "#1a1a1a", border: "1px solid #2a2a2a",
-          color: "#555", cursor: "pointer",
+          background: "#F1F5F9", border: "1px solid #CBD5E1",
+          color: "#64748B", cursor: "pointer",
         }}>← 首頁</button>
         <span style={{ fontSize: 20 }}>🏀</span>
         <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 3, color: "#cc0000" }}>籃球</span>
@@ -28,10 +28,10 @@ export default function BasketballSelect() {
 
       {/* Title */}
       <div style={{ textAlign: "center", padding: "32px 0 24px" }}>
-        <div style={{ fontSize: 11, color: "#444", letterSpacing: 4, marginBottom: 10 }}>
+        <div style={{ fontSize: 11, color: "#94A3B8", letterSpacing: 4, marginBottom: 10 }}>
           SELECT MODE
         </div>
-        <div style={{ fontSize: 28, fontWeight: 900, color: "#f0f0f0", letterSpacing: -1 }}>
+        <div style={{ fontSize: 28, fontWeight: 900, color: "#0F172A", letterSpacing: -1 }}>
           選擇比賽模式
         </div>
       </div>
@@ -66,7 +66,7 @@ export default function BasketballSelect() {
       {/* 快速計分入口:直接輸入結果,頁面內再選 5v5/3v3 */}
       <div style={{ textAlign: "center", padding: "0 16px 28px" }}>
         <button onClick={() => navigate("/quick-record?sport=basketball")} style={{
-          background: "none", border: "none", color: "#555", fontSize: 12,
+          background: "none", border: "none", color: "#64748B", fontSize: 12,
           textDecoration: "underline", cursor: "pointer", fontFamily: "inherit",
         }}>不想一分一分計？直接輸入結果 →</button>
       </div>
@@ -80,7 +80,7 @@ function ModeCard({ label, sub, desc, color, court, onClick }) {
       onClick={onClick}
       style={{
         flex: "1 1 260px", minWidth: 0, maxWidth: 360,
-        background: "#111", border: `1.5px solid #222`,
+        background: "#FFFFFF", border: `1.5px solid #E2E8F0`,
         borderRadius: 20, padding: "28px 24px",
         cursor: "pointer", display: "flex", flexDirection: "column", gap: 16,
         transition: "border-color .2s, transform .15s",
@@ -90,7 +90,7 @@ function ModeCard({ label, sub, desc, color, court, onClick }) {
         e.currentTarget.style.transform = "translateY(-4px)";
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.borderColor = "#222";
+        e.currentTarget.style.borderColor = "#E2E8F0";
         e.currentTarget.style.transform = "translateY(0)";
       }}
     >
@@ -107,7 +107,7 @@ function ModeCard({ label, sub, desc, color, court, onClick }) {
       {/* Label */}
       <div>
         <div style={{
-          fontSize: 32, fontWeight: 900, color: "#f0f0f0",
+          fontSize: 32, fontWeight: 900, color: "#0F172A",
           letterSpacing: -1, lineHeight: 1,
           fontFamily: "'Courier New', monospace",
         }}>{label}</div>
@@ -118,7 +118,7 @@ function ModeCard({ label, sub, desc, color, court, onClick }) {
       </div>
 
       {/* Features */}
-      <div style={{ fontSize: 12, color: "#555", lineHeight: 1.8 }}>
+      <div style={{ fontSize: 12, color: "#64748B", lineHeight: 1.8 }}>
         {desc.split("・").map((f, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{ width: 4, height: 4, borderRadius: "50%", background: color, flexShrink: 0 }} />
