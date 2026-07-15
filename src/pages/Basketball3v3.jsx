@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MatchEndModal from "./MatchEndModal";
+import sportBasketball from "../assets/icons/sport_basketball.png";
 
 const COLORS = ["#cc0000", "#1d4ed8"];
 const LIGHT_BG = ["#fff0f0", "#eef3ff"];
@@ -190,41 +191,41 @@ export default function Basketball3v3() {
     const presets = [11, 15, 21];
     return (
       <div style={{
-        height: "100vh", background: "#0a0a0a",
+        height: "100vh", background: "#F8FAFC",
         fontFamily: "'Noto Sans TC','Inter','Helvetica Neue',sans-serif",
         display: "flex", flexDirection: "column", alignItems: "center",
-        justifyContent: "center", gap: 24, color: "#f0f0f0", position: "relative",
+        justifyContent: "center", gap: 24, color: "#0F172A", position: "relative",
         padding: "0 20px", boxSizing: "border-box",
       }}>
         <button onClick={() => navigate("/basketball-select")} style={{
           position: "absolute", top: 16, left: 16,
           padding: "4px 12px", borderRadius: 6, fontSize: 11, fontWeight: 700,
-          background: "#1a1a1a", border: "1px solid #2a2a2a",
-          color: "#555", cursor: "pointer",
+          background: "#F1F5F9", border: "1px solid #CBD5E1",
+          color: "#64748B", cursor: "pointer",
         }}>← 返回</button>
 
-        <div style={{ fontSize: 36 }}>🏀</div>
-        <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: 4, color: "#f0f0f0" }}>
+        <img src={sportBasketball} alt="籃球" style={{ width: 40, height: 40, objectFit: "contain" }} />
+        <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: 4, color: "#0F172A" }}>
           3 vs 3 籃球
         </div>
 
         {/* Score limit */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-          <div style={{ fontSize: 11, color: "#444", letterSpacing: 3 }}>設定得分上限</div>
+          <div style={{ fontSize: 11, color: "#94A3B8", letterSpacing: 3 }}>設定得分上限</div>
           <div style={{ display: "flex", gap: 10 }}>
             {presets.map(p => (
               <button key={p} onClick={() => { setLimit(p); setCustomLimit(""); }} style={{
                 width: 64, height: 64, borderRadius: 12, fontSize: 22, fontWeight: 900,
-                background: limit === p ? "#cc0000" : "#1a1a1a",
-                border: `2px solid ${limit === p ? "#cc0000" : "#2a2a2a"}`,
-                color: limit === p ? "#fff" : "#555",
+                background: limit === p ? "#cc0000" : "#F1F5F9",
+                border: `2px solid ${limit === p ? "#cc0000" : "#CBD5E1"}`,
+                color: limit === p ? "#fff" : "#64748B",
                 cursor: "pointer", fontFamily: "'Courier New', monospace",
               }}>{p}</button>
             ))}
           </div>
           {/* Custom input */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 11, color: "#444" }}>自訂</span>
+            <span style={{ fontSize: 11, color: "#94A3B8" }}>自訂</span>
             <input
               type="number" min="5" max="99"
               value={customLimit}
@@ -232,8 +233,8 @@ export default function Basketball3v3() {
               placeholder="輸入分數"
               style={{
                 width: 90, padding: "8px 12px", borderRadius: 8,
-                background: "#1a1a1a", border: `1.5px solid ${customLimit ? "#cc0000" : "#2a2a2a"}`,
-                color: "#f0f0f0", fontSize: 14, outline: "none", textAlign: "center",
+                background: "#F1F5F9", border: `1.5px solid ${customLimit ? "#cc0000" : "#CBD5E1"}`,
+                color: "#0F172A", fontSize: 14, outline: "none", textAlign: "center",
                 fontFamily: "'Courier New', monospace",
               }} />
           </div>
@@ -249,8 +250,8 @@ export default function Basketball3v3() {
                 placeholder={i === 0 ? "主隊" : "客隊"}
                 style={{
                   width: "100%", boxSizing: "border-box",
-                  background: "#1a1a1a", border: `1.5px solid ${COLORS[i]}`,
-                  borderRadius: 8, color: "#f0f0f0", fontSize: 14,
+                  background: "#F1F5F9", border: `1.5px solid ${COLORS[i]}`,
+                  borderRadius: 8, color: "#0F172A", fontSize: 14,
                   padding: "8px 10px", outline: "none", textAlign: "center",
                   fontFamily: "inherit",
                 }} />
@@ -263,14 +264,14 @@ export default function Basketball3v3() {
           disabled={!limit}
           style={{
             padding: "12px 40px", borderRadius: 10,
-            background: limit ? "#22c55e" : "#1a1a1a",
-            border: "none", color: limit ? "#fff" : "#333",
+            background: limit ? "#22c55e" : "#E2E8F0",
+            border: "none", color: limit ? "#fff" : "#94A3B8",
             fontSize: 15, fontWeight: 800, cursor: limit ? "pointer" : "not-allowed",
             letterSpacing: 2,
           }}>開始比賽</button>
 
         <button onClick={() => navigate("/quick-record?sport=basketball&mode=3v3")} style={{
-          background: "none", border: "none", color: "#555", fontSize: 12,
+          background: "none", border: "none", color: "#64748B", fontSize: 12,
           textDecoration: "underline", cursor: "pointer", fontFamily: "inherit",
         }}>不想一分一分計？直接輸入結果 →</button>
       </div>
@@ -286,12 +287,13 @@ export default function Basketball3v3() {
 
       {/* Header */}
       <div style={{
-        height: 46, flexShrink: 0, background: "#fff",
+        minHeight: 46, flexShrink: 0, background: "#fff",
         borderBottom: "1px solid #e0e0e0",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 16px",
+        flexWrap: "wrap", rowGap: 6, columnGap: 8,
+        padding: "8px 16px",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flexWrap: "wrap", rowGap: 4 }}>
           <button onClick={() => navigate("/basketball-select")} style={{
             padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
             background: "#f0f0f0", border: "1px solid #ddd", color: "#888", cursor: "pointer",
@@ -306,15 +308,17 @@ export default function Basketball3v3() {
           }}>先得 {limit} 分勝</span>
         </div>
 
-        <button onClick={() => setShowMatchEnd(true)} style={{
-          fontSize: 11, padding: "4px 12px", borderRadius: 6,
-          background: "#cc000022", border: "1px solid #cc000044",
-          color: "#cc0000", cursor: "pointer", marginRight: 8,
-        }}>結束比賽</button>
-        <button onClick={reset} style={{
-          fontSize: 11, padding: "4px 12px", borderRadius: 6,
-          background: "#f5f5f5", border: "1px solid #ddd", color: "#888", cursor: "pointer",
-        }}>重新設定</button>
+        <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+          <button onClick={() => setShowMatchEnd(true)} style={{
+            fontSize: 11, padding: "4px 12px", borderRadius: 6,
+            background: "#cc000022", border: "1px solid #cc000044",
+            color: "#cc0000", cursor: "pointer",
+          }}>結束比賽</button>
+          <button onClick={reset} style={{
+            fontSize: 11, padding: "4px 12px", borderRadius: 6,
+            background: "#f5f5f5", border: "1px solid #ddd", color: "#888", cursor: "pointer",
+          }}>重新設定</button>
+        </div>
       </div>
 
       {showMatchEnd && (

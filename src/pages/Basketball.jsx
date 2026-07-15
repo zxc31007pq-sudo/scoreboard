@@ -36,6 +36,50 @@ function useSecondBlink(active, secs) {
   return bright;
 }
 
+// 偵測手機是否為直向(用於提示切換橫向以獲得完整計分板視野)
+function useIsPortrait() {
+  const [portrait, setPortrait] = useState(
+    () => typeof window !== "undefined" && window.innerHeight > window.innerWidth
+  );
+  useEffect(() => {
+    const check = () => setPortrait(window.innerHeight > window.innerWidth);
+    window.addEventListener("resize", check);
+    window.addEventListener("orientationchange", check);
+    return () => {
+      window.removeEventListener("resize", check);
+      window.removeEventListener("orientationchange", check);
+    };
+  }, []);
+  return portrait;
+}
+
+function RotateHint({ onClose }) {
+  return (
+    <div style={{
+      position:"fixed", inset:0, background:"#000000cc",
+      display:"flex", alignItems:"center", justifyContent:"center", zIndex:150,
+      padding:16,
+    }}>
+      <div style={{
+        background:"#0f0f0f", border:"1px solid #2a2a2a",
+        borderRadius:20, padding:"32px 28px",
+        textAlign:"center", maxWidth:320,
+      }}>
+        <div style={{fontSize:44, marginBottom:14}}>📱↻</div>
+        <div style={{fontSize:16, fontWeight:800, color:"#f0f0f0", marginBottom:8}}>建議橫向使用</div>
+        <div style={{fontSize:13, color:"#888", lineHeight:1.7, marginBottom:20}}>
+          將手機轉為橫向，計分板可以顯示更完整的資訊，操作起來也更順手。
+        </div>
+        <button onClick={onClose} style={{
+          width:"100%", padding:"11px 0", borderRadius:10,
+          background:"#cc0000", border:"none",
+          color:"#fff", fontSize:14, fontWeight:800, cursor:"pointer",
+        }}>知道了，繼續使用</button>
+      </div>
+    </div>
+  );
+}
+
 function Dots({ total, filled, color }) {
   return (
     <div style={{ display:"flex", gap:6 }}>
@@ -275,6 +319,9 @@ export default function Basketball() {
   const [log, setLog] = useState([]);
   const [showTimeout, setShowTimeout] = useState(false);
   const [showMatchEnd, setShowMatchEnd] = useState(false);
+  const isPortrait = useIsPortrait();
+  const [rotateHintDismissed, setRotateHintDismissed] = useState(false);
+  const showRotateHint = isPortrait && !rotateHintDismissed;
   const [teams, setTeams] = useState([
     {name:"主　隊", score:0, fouls:0, techFouls:0, timeouts:0, history:[]},
     {name:"客　隊", score:0, fouls:0, techFouls:0, timeouts:0, history:[]},
@@ -355,6 +402,7 @@ export default function Basketball() {
       color:"#e0e0e0", display:"flex", flexDirection:"column",
       overflowX:"hidden", overflowY:"hidden",
     }}>
+      {showRotateHint && <RotateHint onClose={()=>setRotateHintDismissed(true)}/>}
       {showTimeout && <TimeoutTimer onClose={()=>setShowTimeout(false)}/>}
       {showMatchEnd && (
         <MatchEndModal
@@ -467,35 +515,57 @@ export default function Basketball() {
             </div>
           </div>
 
-          {/* ── MIDDLE 1/3: Shot clock — fills block ── */}
+          {/* ── MIDDLE 1/3: Shot clock — fills block ──
+               橫向時空間變矮,24/14按鈕改放數字兩側,避免直式排列塞不下 */}
           <div style={{
             flex:1,
-            display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+            display:"flex",
+            flexDirection: isPortrait ? "column" : "row",
+            alignItems:"center", justifyContent:"center", gap: isPortrait ? 0 : 14,
             borderTop:"1px solid #1a1a1a", borderBottom:"1px solid #1a1a1a",
             background:"#0c0c0c",
             border: `4px solid ${shotUrgent ? (shotBlink ? "#fff" : "transparent") : "transparent"}`,
             transition: shotUrgent ? "none" : "border-color .3s",
-            overflow:"hidden",
+            overflowY:"auto", overflowX:"hidden", padding: isPortrait ? 0 : "0 10px",
           }}>
-            <div style={{fontSize:11, color:"#444", letterSpacing:3, marginBottom:2}}>SHOT CLOCK</div>
-            <div style={{
-              fontSize:"min(18vw, 22vh)",
-              fontWeight:900,
-              color: shot.secs<=10 && shot.secs>0 ? "#ef4444" : "#f59e0b",
-              fontFamily:"'Bebas Neue', sans-serif",
-              fontVariantNumeric:"tabular-nums",
-              transition:"color .3s", lineHeight:1,
-            }}>{String(shot.secs).padStart(2,"0")}</div>
-            <div style={{display:"flex", gap:8, justifyContent:"center", marginTop:8}}>
+            {!isPortrait && (
               <button onClick={()=>resetShot(24)} style={{
-                padding:"5px 16px", borderRadius:8, fontSize:14, fontWeight:700,
+                padding:"10px 14px", borderRadius:8, fontSize:14, fontWeight:700, flexShrink:0,
                 background:"#1a1a1a", border:"1px solid #2a2a2a", color:"#777", cursor:"pointer",
               }}>24</button>
+            )}
+
+            <div style={{ display:"flex", flexDirection:"column", alignItems:"center" }}>
+              <div style={{fontSize:11, color:"#444", letterSpacing:3, marginBottom:2}}>SHOT CLOCK</div>
+              <div style={{
+                fontSize:"min(18vw, 22vh)",
+                fontWeight:900,
+                color: shot.secs<=10 && shot.secs>0 ? "#ef4444" : "#f59e0b",
+                fontFamily:"'Bebas Neue', sans-serif",
+                fontVariantNumeric:"tabular-nums",
+                transition:"color .3s", lineHeight:1,
+              }}>{String(shot.secs).padStart(2,"0")}</div>
+
+              {isPortrait && (
+                <div style={{display:"flex", gap:8, justifyContent:"center", marginTop:8}}>
+                  <button onClick={()=>resetShot(24)} style={{
+                    padding:"5px 16px", borderRadius:8, fontSize:14, fontWeight:700,
+                    background:"#1a1a1a", border:"1px solid #2a2a2a", color:"#777", cursor:"pointer",
+                  }}>24</button>
+                  <button onClick={()=>resetShot(14)} style={{
+                    padding:"5px 16px", borderRadius:8, fontSize:14, fontWeight:700,
+                    background:"#1a1a1a", border:"1px solid #2a2a2a", color:"#777", cursor:"pointer",
+                  }}>14</button>
+                </div>
+              )}
+            </div>
+
+            {!isPortrait && (
               <button onClick={()=>resetShot(14)} style={{
-                padding:"5px 16px", borderRadius:8, fontSize:14, fontWeight:700,
+                padding:"10px 14px", borderRadius:8, fontSize:14, fontWeight:700, flexShrink:0,
                 background:"#1a1a1a", border:"1px solid #2a2a2a", color:"#777", cursor:"pointer",
               }}>14</button>
-            </div>
+            )}
           </div>
 
           {/* ── BOTTOM 1/3: Controls + log ── */}
