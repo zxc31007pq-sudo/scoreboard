@@ -144,7 +144,7 @@ export default function Player() {
           background: "#F1F5F9", border: "1px solid #CBD5E1", color: "#64748B", cursor: "pointer",
         }}>← 首頁</button>
 
-        <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 3, color: "#0F172A" }}>球員版</span>
+        <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 3, color: "#0F172A" }}>個人</span>
 
         {user ? (
           <button onClick={handleSignOut} style={{
@@ -229,9 +229,9 @@ function HomeTab({ user, profile, displayName, records, rankData, deleteQuota, n
           textAlign: "center",
         }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>👤</div>
-          <div style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", marginBottom: 8 }}>球員版</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", marginBottom: 8 }}>個人</div>
           <div style={{ fontSize: 13, color: "#64748B", marginBottom: 20, lineHeight: 1.6 }}>
-            記錄你的每場比賽<br/>段位積分・個人履歷卡
+            記錄你的每場比賽<br/>段位積分・個人戰績卡
           </div>
           <button onClick={() => navigate("/auth")} style={{
             padding: "10px 32px", borderRadius: 10,
@@ -244,7 +244,7 @@ function HomeTab({ user, profile, displayName, records, rankData, deleteQuota, n
         {[
           { icon: "🏆", title: "段位積分", desc: "籃球、羽球、匹克球各自獨立段位" },
           { icon: "📊", title: "比賽紀錄", desc: "每場比賽的得分、勝負、積分變化" },
-          { icon: "🎖️", title: "個人履歷卡", desc: "分享你的戰績到社群媒體" },
+          { icon: "🎖️", title: "個人戰績卡", desc: "分享你的戰績到社群媒體" },
         ].map((f, i) => (
           <div key={i} style={{
             background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12,

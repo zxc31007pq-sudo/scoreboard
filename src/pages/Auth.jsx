@@ -95,7 +95,7 @@ export default function Auth() {
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>👤</div>
           <div style={{ fontSize: 20, fontWeight: 900, color: "#f0f0f0", marginBottom: 6 }}>
-            球員版
+            個人
           </div>
           <div style={{ fontSize: 13, color: "#555", lineHeight: 1.6 }}>
             記錄比賽・段位積分・戰績卡
