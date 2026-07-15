@@ -515,35 +515,57 @@ export default function Basketball() {
             </div>
           </div>
 
-          {/* ── MIDDLE 1/3: Shot clock — fills block ── */}
+          {/* ── MIDDLE 1/3: Shot clock — fills block ──
+               橫向時空間變矮,24/14按鈕改放數字兩側,避免直式排列塞不下 */}
           <div style={{
             flex:1,
-            display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+            display:"flex",
+            flexDirection: isPortrait ? "column" : "row",
+            alignItems:"center", justifyContent:"center", gap: isPortrait ? 0 : 14,
             borderTop:"1px solid #1a1a1a", borderBottom:"1px solid #1a1a1a",
             background:"#0c0c0c",
             border: `4px solid ${shotUrgent ? (shotBlink ? "#fff" : "transparent") : "transparent"}`,
             transition: shotUrgent ? "none" : "border-color .3s",
-            overflowY:"auto", overflowX:"hidden",
+            overflowY:"auto", overflowX:"hidden", padding: isPortrait ? 0 : "0 10px",
           }}>
-            <div style={{fontSize:11, color:"#444", letterSpacing:3, marginBottom:2}}>SHOT CLOCK</div>
-            <div style={{
-              fontSize:"min(18vw, 22vh)",
-              fontWeight:900,
-              color: shot.secs<=10 && shot.secs>0 ? "#ef4444" : "#f59e0b",
-              fontFamily:"'Bebas Neue', sans-serif",
-              fontVariantNumeric:"tabular-nums",
-              transition:"color .3s", lineHeight:1,
-            }}>{String(shot.secs).padStart(2,"0")}</div>
-            <div style={{display:"flex", gap:8, justifyContent:"center", marginTop:8}}>
+            {!isPortrait && (
               <button onClick={()=>resetShot(24)} style={{
-                padding:"5px 16px", borderRadius:8, fontSize:14, fontWeight:700,
+                padding:"10px 14px", borderRadius:8, fontSize:14, fontWeight:700, flexShrink:0,
                 background:"#1a1a1a", border:"1px solid #2a2a2a", color:"#777", cursor:"pointer",
               }}>24</button>
+            )}
+
+            <div style={{ display:"flex", flexDirection:"column", alignItems:"center" }}>
+              <div style={{fontSize:11, color:"#444", letterSpacing:3, marginBottom:2}}>SHOT CLOCK</div>
+              <div style={{
+                fontSize:"min(18vw, 22vh)",
+                fontWeight:900,
+                color: shot.secs<=10 && shot.secs>0 ? "#ef4444" : "#f59e0b",
+                fontFamily:"'Bebas Neue', sans-serif",
+                fontVariantNumeric:"tabular-nums",
+                transition:"color .3s", lineHeight:1,
+              }}>{String(shot.secs).padStart(2,"0")}</div>
+
+              {isPortrait && (
+                <div style={{display:"flex", gap:8, justifyContent:"center", marginTop:8}}>
+                  <button onClick={()=>resetShot(24)} style={{
+                    padding:"5px 16px", borderRadius:8, fontSize:14, fontWeight:700,
+                    background:"#1a1a1a", border:"1px solid #2a2a2a", color:"#777", cursor:"pointer",
+                  }}>24</button>
+                  <button onClick={()=>resetShot(14)} style={{
+                    padding:"5px 16px", borderRadius:8, fontSize:14, fontWeight:700,
+                    background:"#1a1a1a", border:"1px solid #2a2a2a", color:"#777", cursor:"pointer",
+                  }}>14</button>
+                </div>
+              )}
+            </div>
+
+            {!isPortrait && (
               <button onClick={()=>resetShot(14)} style={{
-                padding:"5px 16px", borderRadius:8, fontSize:14, fontWeight:700,
+                padding:"10px 14px", borderRadius:8, fontSize:14, fontWeight:700, flexShrink:0,
                 background:"#1a1a1a", border:"1px solid #2a2a2a", color:"#777", cursor:"pointer",
               }}>14</button>
-            </div>
+            )}
           </div>
 
           {/* ── BOTTOM 1/3: Controls + log ── */}
