@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { createMatch } from "../matchService";
+import { trackQuickRecordUsed } from "../analyticsService";
 import sportBasketball  from "../assets/icons/sport_basketball.png";
 import sportBadminton   from "../assets/icons/sport_badminton.png";
 import sportTabletennis from "../assets/icons/sport_tabletennis.png";
@@ -74,6 +75,7 @@ export default function QuickRecord() {
         scoreA: a, scoreB: b, winner,
         source: "quick",
       });
+      trackQuickRecordUsed(sport, mode);
       navigate(`/claim/${id}`);
     } catch {
       setError("建立比賽失敗，請再試一次");
