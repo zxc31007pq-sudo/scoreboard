@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MatchEndModal from "./MatchEndModal";
 import sportPickleball from "../assets/icons/sport_pickleball.png";
@@ -44,7 +44,7 @@ function AdBanner() {
 
 function ScoreCard({ score, color, lightBg, serving, name, onScore, onUndo,
                      onNameClick, editing, onNameChange, onNameBlur,
-                     side, mode, serverIdx, players, canScore = serving }) {
+                     side, mode, serverIdx, players, canScore = serving, showServerName = true }) {
   const [pressed, setPressed] = useState(false);
   const zone = getServeZone(score);
 
@@ -104,7 +104,7 @@ function ScoreCard({ score, color, lightBg, serving, name, onScore, onUndo,
               borderRadius: 6, padding: "2px 10px",
               fontSize: 12, fontWeight: 800, letterSpacing: 1,
             }}>{zone}</div>
-            {mode === "doubles" && players && (
+            {mode === "doubles" && players && showServerName && (
               <span style={{ fontSize: 11, color, fontWeight: 600 }}>
                 {players[serverIdx]}
               </span>
@@ -211,6 +211,8 @@ export default function Pickleball() {
   const [swapped, setSwapped] = useState(false); // 純顯示層級換場,不動任何比分/隊名資料
   const [isSwapping, setIsSwapping] = useState(false);
   const [showSwapConfirm, setShowSwapConfirm] = useState(false);
+  const [showAutoSwapPrompt, setShowAutoSwapPrompt] = useState(false);
+  const [swapPromptedFor, setSwapPromptedFor] = useState(-1); // 已提示過換場的局數(curSet),避免重複跳出
 
   const winsNeeded = format === "bo3" ? 2 : 1;
   const winTarget = scoringType === "rally" ? targetScore : WIN_SCORE;
@@ -233,6 +235,17 @@ export default function Pickleball() {
   const leftTeam = swapped ? 1 : 0;
   const rightTeam = swapped ? 0 : 1;
 
+  // 正式規則:打11分全程不換場;打15分,任一方先到8分時換場一次(21分制才是11分,此計分板無21分選項故不適用)
+  useEffect(() => {
+    if (
+      scoringType === "rally" && targetScore === 15 && winner === null &&
+      (s0 === 8 || s1 === 8) && swapPromptedFor !== curSet
+    ) {
+      setShowAutoSwapPrompt(true);
+      setSwapPromptedFor(curSet);
+    }
+  }, [s0, s1, scoringType, targetScore, curSet, winner, swapPromptedFor]);
+
   const showAlert = (msg, dur = 2800) => {
     setAlert(msg);
     setTimeout(() => setAlert(null), dur);
@@ -248,6 +261,15 @@ export default function Pickleball() {
       serving, serverIdx: [...serverIdx],
       setWins: [...setWins], firstServe,
     }]);
+
+    // 落地得分制:贏得這一球的一方立刻取得發球權(正式規則:誰贏球誰發下一球,
+    // 沒有側手/失誤的中間狀態)。雙打不做官方版位置輪轉那麼細,換發球時固定從隊內第1位開始。
+    if (scoringType === "rally" && team !== serving) {
+      setServing(team);
+      if (mode === "doubles") {
+        setServerIdx(prev => { const n = [...prev]; n[team] = 0; return n; });
+      }
+    }
 
     const cur = [...scores[curSet]];
     cur[team]++;
@@ -347,6 +369,7 @@ export default function Pickleball() {
     setHistory([]);
     setAlert(null);
     setSwapped(false);
+    setSwapPromptedFor(-1);
   };
 
   // 換場:純顯示層級,只改變左右渲染順序,不動任何比分/隊名/發球方資料
@@ -540,10 +563,6 @@ export default function Pickleball() {
         </div>
 
         <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-          <button onClick={() => setShowSwapConfirm(true)} style={{
-            fontSize: 11, padding: "4px 12px", borderRadius: 6,
-            background: "#f5f5f5", border: "1px solid #ddd", color: "#888", cursor: "pointer",
-          }}>🔄 換場</button>
           <button onClick={reset} style={{
             fontSize: 11, padding: "4px 12px", borderRadius: 6,
             background: "#f5f5f5", border: "1px solid #ddd", color: "#888", cursor: "pointer",
@@ -590,6 +609,39 @@ export default function Pickleball() {
         </div>
       )}
 
+      {/* 自動換場提示(依正式規則:15分制任一方先到8分時提示換場一次) */}
+      {showAutoSwapPrompt && (
+        <div style={{
+          position: "fixed", inset: 0, background: "#000000cc",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 250, padding: 16,
+        }}>
+          <div style={{
+            width: "100%", maxWidth: 320,
+            background: "#fff", borderRadius: 20, padding: "24px 20px",
+            display: "flex", flexDirection: "column", gap: 14,
+          }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>🔄</div>
+              <div style={{ fontSize: 15, fontWeight: 900, color: "#222", marginBottom: 4 }}>已有一方先達到8分</div>
+              <div style={{ fontSize: 12, color: "#888" }}>依規則此時建議換場一次,要換場嗎？</div>
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => setShowAutoSwapPrompt(false)} style={{
+                flex: 1, padding: "11px 0", borderRadius: 10,
+                background: "#f5f5f5", border: "1px solid #ddd",
+                color: "#888", fontSize: 13, cursor: "pointer",
+              }}>略過</button>
+              <button onClick={() => { doSwap(); setShowAutoSwapPrompt(false); }} style={{
+                flex: 1, padding: "11px 0", borderRadius: 10,
+                background: COLORS[1], border: "none",
+                color: "#fff", fontSize: 13, fontWeight: 800, cursor: "pointer",
+              }}>換場</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showMatchEnd && (
         <MatchEndModal
           sport="pickleball" mode={mode === "doubles" ? "雙打" : "單打"}
@@ -622,6 +674,7 @@ export default function Pickleball() {
           onNameChange={v => { const n = [...names]; n[leftTeam] = v; setNames(n); }}
           onNameBlur={() => setEditing(null)}
           canScore={canScore(leftTeam)}
+          showServerName={scoringType !== "rally"}
         />
 
         {/* Center */}
@@ -633,12 +686,22 @@ export default function Pickleball() {
         }}>
           <span style={{ fontSize: 11, color: "#ccc", letterSpacing: 3 }}>VS</span>
 
-          {/* 失誤換發球按鈕 */}
-          <button onClick={fault} style={{
+          {/* 換場按鈕 */}
+          <button onClick={() => setShowSwapConfirm(true)} style={{
             width: 64, padding: "8px 4px", borderRadius: 8, fontSize: 11, fontWeight: 700,
-            background: "#fee2e2", border: "1.5px solid #fca5a5",
-            color: "#dc2626", cursor: "pointer", textAlign: "center", lineHeight: 1.4,
-          }}>失誤<br/>換發球</button>
+            background: "#f5f5f5", border: "1.5px solid #ddd",
+            color: "#888", cursor: "pointer", textAlign: "center", lineHeight: 1.4,
+          }}>🔄<br/>換場</button>
+
+          {/* 失誤換發球按鈕:僅發球得分制顯示,落地得分制沒有「失誤但不得分」這個狀態,
+              贏球方已透過 score() 自動取得發球權 */}
+          {scoringType !== "rally" && (
+            <button onClick={fault} style={{
+              width: 64, padding: "8px 4px", borderRadius: 8, fontSize: 11, fontWeight: 700,
+              background: "#fee2e2", border: "1.5px solid #fca5a5",
+              color: "#dc2626", cursor: "pointer", textAlign: "center", lineHeight: 1.4,
+            }}>失誤<br/>換發球</button>
+          )}
 
           {/* Set scores */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
@@ -673,6 +736,7 @@ export default function Pickleball() {
           onNameChange={v => { const n = [...names]; n[rightTeam] = v; setNames(n); }}
           onNameBlur={() => setEditing(null)}
           canScore={canScore(rightTeam)}
+          showServerName={scoringType !== "rally"}
         />
       </div>
 
