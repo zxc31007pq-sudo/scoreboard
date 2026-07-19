@@ -8,9 +8,9 @@ const WIN_SCORE = 11;
 const COLORS = ["#c2410c", "#1d4ed8"];
 const LIGHT_BG = ["#fff3ee", "#eef3ff"];
 
-function calcWinner(a, b) {
+function calcWinner(a, b, target = WIN_SCORE) {
   const diff = Math.abs(a - b);
-  if ((a >= WIN_SCORE || b >= WIN_SCORE) && diff >= 2) return a > b ? 0 : 1;
+  if ((a >= target || b >= target) && diff >= 2) return a > b ? 0 : 1;
   return null;
 }
 
@@ -44,12 +44,12 @@ function AdBanner() {
 
 function ScoreCard({ score, color, lightBg, serving, name, onScore, onUndo,
                      onNameClick, editing, onNameChange, onNameBlur,
-                     side, mode, serverIdx, players }) {
+                     side, mode, serverIdx, players, canScore = serving }) {
   const [pressed, setPressed] = useState(false);
   const zone = getServeZone(score);
 
   const handleScore = () => {
-    if (!serving) return; // 非發球方不能得分
+    if (!canScore) return; // 發球得分制:非發球方不能得分;落地得分制:兩邊皆可得分
     onScore();
   };
 
@@ -122,11 +122,11 @@ function ScoreCard({ score, color, lightBg, serving, name, onScore, onUndo,
         onPointerLeave={() => setPressed(false)}
         style={{
           flex: 1,
-          background: serving ? lightBg : "#f8f8f8",
-          border: serving ? `6px solid ${color}` : "6px solid transparent",
+          background: canScore ? lightBg : "#f8f8f8",
+          border: canScore ? `6px solid ${color}` : "6px solid transparent",
           display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: serving ? "pointer" : "not-allowed",
-          transform: pressed && serving ? "scale(.97)" : "scale(1)",
+          cursor: canScore ? "pointer" : "not-allowed",
+          transform: pressed && canScore ? "scale(.97)" : "scale(1)",
           transition: "transform .1s, background .2s, border .2s",
           userSelect: "none",
           position: "relative",
@@ -157,7 +157,7 @@ function ScoreCard({ score, color, lightBg, serving, name, onScore, onUndo,
         <span style={{
           fontSize: "min(22vw, 30vh)",
           fontWeight: 900,
-          color: serving ? color : "#ccc",
+          color: canScore ? color : "#ccc",
           fontFamily: "'Bebas Neue', sans-serif",
           letterSpacing: "-0.05em",
           lineHeight: 1,
@@ -165,8 +165,8 @@ function ScoreCard({ score, color, lightBg, serving, name, onScore, onUndo,
           transition: "color .2s",
         }}>{String(score).padStart(2, "0")}</span>
 
-        {/* Not serving hint */}
-        {!serving && (
+        {/* Not serving hint(僅發球得分制顯示) */}
+        {!canScore && (
           <div style={{
             position: "absolute", bottom: 16,
             fontSize: 11, color: "#ccc", letterSpacing: 1,
@@ -182,11 +182,11 @@ function ScoreCard({ score, color, lightBg, serving, name, onScore, onUndo,
       }}>
         <button
           onClick={handleScore}
-          disabled={!serving}
+          disabled={!canScore}
           style={{
             padding: "8px 28px", borderRadius: 10, fontSize: 16, fontWeight: 800,
-            background: serving ? color : "#e0e0e0",
-            border: "none", color: "#fff", cursor: serving ? "pointer" : "not-allowed",
+            background: canScore ? color : "#e0e0e0",
+            border: "none", color: "#fff", cursor: canScore ? "pointer" : "not-allowed",
           }}>+1</button>
         <button onClick={onUndo} style={{
           padding: "8px 18px", borderRadius: 10, fontSize: 14,
@@ -202,12 +202,19 @@ export default function Pickleball() {
   const navigate = useNavigate();
   const [mode, setMode] = useState(null); // "singles" | "doubles"
   const [format, setFormat] = useState(null); // "bo1" | "bo3"
+  const [scoringType, setScoringType] = useState(null); // "sideout"(發球得分制) | "rally"(落地得分制)
+  const [targetScore, setTargetScore] = useState(null); // 落地得分制專用:11 | 15
   const [names, setNames] = useState(["左方", "右方"]);
   const [players, setPlayers] = useState([["A", "B"], ["C", "D"]]);
   const [editing, setEditing] = useState(null);
   const [setupDone, setSetupDone] = useState(false);
+  const [swapped, setSwapped] = useState(false); // 純顯示層級換場,不動任何比分/隊名資料
+  const [isSwapping, setIsSwapping] = useState(false);
+  const [showSwapConfirm, setShowSwapConfirm] = useState(false);
 
   const winsNeeded = format === "bo3" ? 2 : 1;
+  const winTarget = scoringType === "rally" ? targetScore : WIN_SCORE;
+  const readyForNames = mode && format && scoringType && (scoringType === "sideout" || targetScore);
 
   // Game state
   const [scores, setScores] = useState([[0, 0]]);
@@ -221,7 +228,10 @@ export default function Pickleball() {
 
   const curSet = scores.length - 1;
   const [s0, s1] = scores[curSet];
-  const winner = calcWinner(s0, s1);
+  const winner = calcWinner(s0, s1, winTarget);
+  const canScore = (team) => scoringType === "rally" ? true : serving === team;
+  const leftTeam = swapped ? 1 : 0;
+  const rightTeam = swapped ? 0 : 1;
 
   const showAlert = (msg, dur = 2800) => {
     setAlert(msg);
@@ -230,7 +240,8 @@ export default function Pickleball() {
 
   const score = (team) => {
     if (winner !== null) return;
-    if (team !== serving) return; // 傳統規則：只有發球方得分
+    // 發球得分制:只有發球方得分;落地得分制:任一方贏球都能得分,發球權轉移邏輯不受影響
+    if (scoringType === "sideout" && team !== serving) return;
 
     setHistory(h => [...h, {
       scores: scores.map(r => [...r]),
@@ -241,7 +252,7 @@ export default function Pickleball() {
     const cur = [...scores[curSet]];
     cur[team]++;
 
-    const w = calcWinner(cur[0], cur[1]);
+    const w = calcWinner(cur[0], cur[1], winTarget);
     if (w !== null) {
       const nw = [...setWins]; nw[w]++;
       setSetWins(nw);
@@ -335,6 +346,15 @@ export default function Pickleball() {
     setFirstServe(true);
     setHistory([]);
     setAlert(null);
+    setSwapped(false);
+  };
+
+  // 換場:純顯示層級,只改變左右渲染順序,不動任何比分/隊名/發球方資料
+  const doSwap = () => {
+    setShowSwapConfirm(false);
+    setIsSwapping(true);
+    setSwapped(s => !s);
+    setTimeout(() => setIsSwapping(false), 260);
   };
 
   // ── Setup ──
@@ -388,8 +408,42 @@ export default function Pickleball() {
           </div>
         )}
 
-        {/* Names */}
+        {/* Scoring type */}
         {mode && format && (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+            <div style={{ fontSize: 12, color: "#888", letterSpacing: 2 }}>計分方式</div>
+            <div style={{ display: "flex", gap: 12 }}>
+              {[{ key: "sideout", label: "發球得分制" }, { key: "rally", label: "落地得分制" }].map(s => (
+                <button key={s.key} onClick={() => { setScoringType(s.key); if (s.key === "sideout") setTargetScore(null); }} style={{
+                  padding: "11px 24px", borderRadius: 10, fontSize: 14, fontWeight: 700,
+                  background: scoringType === s.key ? COLORS[0] : "#f5f5f5",
+                  border: `2px solid ${scoringType === s.key ? COLORS[0] : "#ddd"}`,
+                  color: scoringType === s.key ? "#fff" : "#555", cursor: "pointer",
+                }}>{s.label}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Target score(僅落地得分制) */}
+        {mode && format && scoringType === "rally" && (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+            <div style={{ fontSize: 12, color: "#888", letterSpacing: 2 }}>目標分數</div>
+            <div style={{ display: "flex", gap: 12 }}>
+              {[11, 15].map(t => (
+                <button key={t} onClick={() => setTargetScore(t)} style={{
+                  padding: "11px 28px", borderRadius: 10, fontSize: 14, fontWeight: 700,
+                  background: targetScore === t ? COLORS[1] : "#f5f5f5",
+                  border: `2px solid ${targetScore === t ? COLORS[1] : "#ddd"}`,
+                  color: targetScore === t ? "#fff" : "#555", cursor: "pointer",
+                }}>{t} 分</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Names */}
+        {readyForNames && (
           <div style={{ display: "flex", gap: 16, width: "100%", maxWidth: 340, minWidth: 0 }}>
             {[0, 1].map(i => (
               <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center", flex: 1, minWidth: 0 }}>
@@ -420,7 +474,7 @@ export default function Pickleball() {
           </div>
         )}
 
-        {mode && format && (
+        {readyForNames && (
           <button onClick={() => setSetupDone(true)} style={{
             marginTop: 8, padding: "12px 40px", borderRadius: 10,
             background: "#22c55e", border: "none",
@@ -461,12 +515,12 @@ export default function Pickleball() {
           <span style={{
             fontSize: 10, background: "#f0f0f0", border: "1px solid #ddd",
             borderRadius: 4, padding: "2px 8px", color: "#888",
-          }}>{mode === "doubles" ? "雙打" : "單打"} · {format === "bo3" ? "三局兩勝" : "一局決勝"}</span>
+          }}>{mode === "doubles" ? "雙打" : "單打"} · {format === "bo3" ? "三局兩勝" : "一局決勝"} · {scoringType === "rally" ? `落地得分制(${targetScore}分)` : "發球得分制"}</span>
         </div>
 
-        {/* Set wins */}
+        {/* Set wins(依換場順序顯示,跟下方比分卡片位置對齊) */}
         <div style={{ display: "flex", gap: 24, alignItems: "center", flexWrap: "wrap", rowGap: 4, minWidth: 0 }}>
-          {[0, 1].map(i => (
+          {(swapped ? [1, 0] : [0, 1]).map(i => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ fontSize: 12, color: COLORS[i], fontWeight: 700 }}>{names[i]}</span>
               {format === "bo3" && (
@@ -486,6 +540,10 @@ export default function Pickleball() {
         </div>
 
         <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+          <button onClick={() => setShowSwapConfirm(true)} style={{
+            fontSize: 11, padding: "4px 12px", borderRadius: 6,
+            background: "#f5f5f5", border: "1px solid #ddd", color: "#888", cursor: "pointer",
+          }}>🔄 換場</button>
           <button onClick={reset} style={{
             fontSize: 11, padding: "4px 12px", borderRadius: 6,
             background: "#f5f5f5", border: "1px solid #ddd", color: "#888", cursor: "pointer",
@@ -499,6 +557,38 @@ export default function Pickleball() {
           )}
         </div>
       </div>
+
+      {/* 換場確認彈窗 */}
+      {showSwapConfirm && (
+        <div style={{
+          position: "fixed", inset: 0, background: "#000000cc",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 250, padding: 16,
+        }}>
+          <div style={{
+            width: "100%", maxWidth: 320,
+            background: "#fff", borderRadius: 20, padding: "24px 20px",
+            display: "flex", flexDirection: "column", gap: 14,
+          }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>🔄</div>
+              <div style={{ fontSize: 15, fontWeight: 900, color: "#222" }}>確定要換場嗎？</div>
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => setShowSwapConfirm(false)} style={{
+                flex: 1, padding: "11px 0", borderRadius: 10,
+                background: "#f5f5f5", border: "1px solid #ddd",
+                color: "#888", fontSize: 13, cursor: "pointer",
+              }}>取消</button>
+              <button onClick={doSwap} style={{
+                flex: 1, padding: "11px 0", borderRadius: 10,
+                background: COLORS[1], border: "none",
+                color: "#fff", fontSize: 13, fontWeight: 800, cursor: "pointer",
+              }}>確認</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showMatchEnd && (
         <MatchEndModal
@@ -519,15 +609,19 @@ export default function Pickleball() {
       )}
 
       {/* MAIN */}
-      <div style={{ flex: 1, display: "flex", minHeight: 0, minWidth: 0, overflow: "hidden" }}>
-        <ScoreCard
-          score={s0} color={COLORS[0]} lightBg={LIGHT_BG[0]}
-          serving={serving === 0} name={names[0]} side="left"
-          mode={mode} serverIdx={serverIdx[0]} players={mode === "doubles" ? players[0] : null}
-          onScore={() => score(0)} onUndo={undo}
-          onNameClick={() => setEditing(0)} editing={editing === 0}
-          onNameChange={v => { const n = [...names]; n[0] = v; setNames(n); }}
+      <div style={{
+        flex: 1, display: "flex", minHeight: 0, minWidth: 0, overflow: "hidden",
+        opacity: isSwapping ? 0.3 : 1, transition: "opacity .25s",
+      }}>
+        <ScoreCard key={leftTeam}
+          score={scores[curSet][leftTeam]} color={COLORS[leftTeam]} lightBg={LIGHT_BG[leftTeam]}
+          serving={serving === leftTeam} name={names[leftTeam]} side="left"
+          mode={mode} serverIdx={serverIdx[leftTeam]} players={mode === "doubles" ? players[leftTeam] : null}
+          onScore={() => score(leftTeam)} onUndo={undo}
+          onNameClick={() => setEditing(leftTeam)} editing={editing === leftTeam}
+          onNameChange={v => { const n = [...names]; n[leftTeam] = v; setNames(n); }}
           onNameBlur={() => setEditing(null)}
+          canScore={canScore(leftTeam)}
         />
 
         {/* Center */}
@@ -570,14 +664,15 @@ export default function Pickleball() {
           )}
         </div>
 
-        <ScoreCard
-          score={s1} color={COLORS[1]} lightBg={LIGHT_BG[1]}
-          serving={serving === 1} name={names[1]} side="right"
-          mode={mode} serverIdx={serverIdx[1]} players={mode === "doubles" ? players[1] : null}
-          onScore={() => score(1)} onUndo={undo}
-          onNameClick={() => setEditing(1)} editing={editing === 1}
-          onNameChange={v => { const n = [...names]; n[1] = v; setNames(n); }}
+        <ScoreCard key={rightTeam}
+          score={scores[curSet][rightTeam]} color={COLORS[rightTeam]} lightBg={LIGHT_BG[rightTeam]}
+          serving={serving === rightTeam} name={names[rightTeam]} side="right"
+          mode={mode} serverIdx={serverIdx[rightTeam]} players={mode === "doubles" ? players[rightTeam] : null}
+          onScore={() => score(rightTeam)} onUndo={undo}
+          onNameClick={() => setEditing(rightTeam)} editing={editing === rightTeam}
+          onNameChange={v => { const n = [...names]; n[rightTeam] = v; setNames(n); }}
           onNameBlur={() => setEditing(null)}
+          canScore={canScore(rightTeam)}
         />
       </div>
 
