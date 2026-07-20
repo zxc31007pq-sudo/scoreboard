@@ -8,6 +8,7 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
+import { trackSignup } from "../analyticsService";
 
 async function createUserProfile(user) {
   const ref = doc(db, "users", user.uid);
@@ -20,6 +21,7 @@ async function createUserProfile(user) {
       privacy: "private",
       createdAt: serverTimestamp(),
     });
+    trackSignup(); // 只有真正新建帳號才算註冊,既有帳號重新登入不會進到這個分支
   }
 }
 

@@ -1,6 +1,7 @@
 import { collection, addDoc, getDoc, getDocs, doc, updateDoc, deleteDoc, setDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { getRankData, applyMatchResult, saveRankData, getSeasonKey } from "./rankService";
+import { trackMatchCreated, trackMatchClaimed } from "./analyticsService";
 
 const FREE_DELETE_LIMIT = 3;
 const PRO_DELETE_LIMIT = 10; // 付費版功能,待 PRO 判斷邏輯上線後啟用
@@ -36,6 +37,7 @@ export async function createMatch({ sport, mode, teamA, teamB, scoreA, scoreB, w
     ...(source ? { source } : {}), // 可選欄位:快速計分模式標記 "quick",未傳入則不寫入(向下相容)
   });
 
+  trackMatchCreated(sport, mode);
   return ref.id; // 回傳比賽 ID
 }
 
@@ -113,6 +115,7 @@ export async function claimMatch(matchId, uid, { name, side }) {
     [side === "A" ? "claimsA" : "claimsB"]: arrayUnion(uid),
   });
 
+  trackMatchClaimed(match.sport, match.mode);
   return {
     result: isWinner ? "勝" : "敗",
     pts: rankResult.earned,
