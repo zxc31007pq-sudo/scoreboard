@@ -203,7 +203,7 @@ export default function Pickleball() {
   const [mode, setMode] = useState(null); // "singles" | "doubles"
   const [format, setFormat] = useState(null); // "bo1" | "bo3"
   const [scoringType, setScoringType] = useState(null); // "sideout"(發球得分制) | "rally"(落地得分制)
-  const [targetScore, setTargetScore] = useState(null); // 落地得分制專用:11 | 15
+  const [targetScore, setTargetScore] = useState(null); // 落地得分制專用:15 | 21
   const [names, setNames] = useState(["左方", "右方"]);
   const [players, setPlayers] = useState([["A", "B"], ["C", "D"]]);
   const [editing, setEditing] = useState(null);
@@ -235,16 +235,17 @@ export default function Pickleball() {
   const leftTeam = swapped ? 1 : 0;
   const rightTeam = swapped ? 0 : 1;
 
-  // 正式規則:打11分全程不換場;打15分,任一方先到8分時換場一次(21分制才是11分,此計分板無21分選項故不適用)
+  // 正式規則:打15分,任一方先到8分時換場一次;打21分,任一方先到11分時換場一次
+  const swapThreshold = targetScore === 15 ? 8 : targetScore === 21 ? 11 : null;
   useEffect(() => {
     if (
-      scoringType === "rally" && targetScore === 15 && winner === null &&
-      (s0 === 8 || s1 === 8) && swapPromptedFor !== curSet
+      scoringType === "rally" && swapThreshold !== null && winner === null &&
+      (s0 === swapThreshold || s1 === swapThreshold) && swapPromptedFor !== curSet
     ) {
       setShowAutoSwapPrompt(true);
       setSwapPromptedFor(curSet);
     }
-  }, [s0, s1, scoringType, targetScore, curSet, winner, swapPromptedFor]);
+  }, [s0, s1, scoringType, swapThreshold, curSet, winner, swapPromptedFor]);
 
   const showAlert = (msg, dur = 2800) => {
     setAlert(msg);
@@ -453,7 +454,7 @@ export default function Pickleball() {
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
             <div style={{ fontSize: 12, color: "#888", letterSpacing: 2 }}>目標分數</div>
             <div style={{ display: "flex", gap: 12 }}>
-              {[11, 15].map(t => (
+              {[15, 21].map(t => (
                 <button key={t} onClick={() => setTargetScore(t)} style={{
                   padding: "11px 28px", borderRadius: 10, fontSize: 14, fontWeight: 700,
                   background: targetScore === t ? COLORS[1] : "#f5f5f5",
@@ -623,7 +624,7 @@ export default function Pickleball() {
           }}>
             <div style={{ textAlign: "center" }}>
               <div style={{ fontSize: 32, marginBottom: 8 }}>🔄</div>
-              <div style={{ fontSize: 15, fontWeight: 900, color: "#222", marginBottom: 4 }}>已有一方先達到8分</div>
+              <div style={{ fontSize: 15, fontWeight: 900, color: "#222", marginBottom: 4 }}>已有一方先達到{swapThreshold}分</div>
               <div style={{ fontSize: 12, color: "#888" }}>依規則此時建議換場一次,要換場嗎？</div>
             </div>
             <div style={{ display: "flex", gap: 10 }}>
