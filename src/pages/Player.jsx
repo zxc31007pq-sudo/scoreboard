@@ -804,6 +804,18 @@ function ProfileTab({ user, profile, displayName, onSignOut, navigate }) {
         }}>刪除帳號</div>
       </div>
 
+      {/* Legal */}
+      <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 14, padding: "16px" }}>
+        <div onClick={() => navigate("/privacy")} style={{
+          padding: "12px 0", borderBottom: "1px solid #F1F5F9",
+          fontSize: 13, fontWeight: 600, color: "#0F172A", cursor: "pointer",
+        }}>隱私權政策</div>
+        <div onClick={() => navigate("/terms")} style={{
+          padding: "12px 0",
+          fontSize: 13, fontWeight: 600, color: "#0F172A", cursor: "pointer",
+        }}>使用條款</div>
+      </div>
+
       {/* Delete confirm modal */}
       {delConfirm && (
         <div style={{

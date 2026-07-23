@@ -11,6 +11,8 @@ import Auth from "./pages/Auth";
 import ClaimMatch from "./pages/ClaimMatch";
 import PublicProfile from "./pages/PublicProfile";
 import QuickRecord from "./pages/QuickRecord";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfUse from "./pages/TermsOfUse";
 
 export default function App() {
   return (
@@ -28,6 +30,8 @@ export default function App() {
         <Route path="/quick-record" element={<QuickRecord />} />
         <Route path="/claim/:matchId" element={<ClaimMatch />} />
         <Route path="/profile/:uid" element={<PublicProfile />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfUse />} />
       </Routes>
     </BrowserRouter>
   );
