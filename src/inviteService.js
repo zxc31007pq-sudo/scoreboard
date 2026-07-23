@@ -1,6 +1,7 @@
 import {
   collection, addDoc, getDoc, getDocs, doc, updateDoc,
   query, orderBy, arrayUnion, arrayRemove, serverTimestamp,
+  getCountFromServer,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -88,6 +89,7 @@ export async function createInvite(data) {
 
 // 讀取邀約列表，支援 sport / city / district / level 篩選
 // 惰性過期檢查：只在前端過濾不顯示已過期的邀約，不刪除資料庫紀錄(比照現有比賽紀錄的保留模式)
+// 每筆邀約會額外附上 commentCount(留言數，用 Firestore 的 count 聚合查詢即時算出，不需另外維護欄位)
 export async function getInvites(filters = {}) {
   const snap = await getDocs(query(collection(db, "invites"), orderBy("createdAt", "desc")));
   let invites = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -98,6 +100,11 @@ export async function getInvites(filters = {}) {
   if (filters.city) invites = invites.filter(inv => inv.city === filters.city);
   if (filters.district) invites = invites.filter(inv => inv.district === filters.district);
   if (filters.level) invites = invites.filter(inv => inv.levelTag === filters.level);
+
+  const counts = await Promise.all(
+    invites.map(inv => getCountFromServer(collection(db, "invites", inv.id, "comments")))
+  );
+  invites = invites.map((inv, i) => ({ ...inv, commentCount: counts[i].data().count }));
 
   return invites;
 }
