@@ -15,9 +15,7 @@ const SPORT_IMGS = {
 };
 
 const SPORTS = ["basketball", "badminton", "tabletennis", "pickleball"];
-const REGIONS = Object.entries(TAIWAN_DISTRICTS).flatMap(([city, districts]) =>
-  districts.map(district => ({ city, district, label: `${city}${district}` }))
-);
+const CITIES = Object.keys(TAIWAN_DISTRICTS);
 
 function InviteCard({ invite, onClick }) {
   return (
@@ -87,7 +85,8 @@ export default function InviteFeed() {
   const [error, setError] = useState("");
 
   const [sportFilter, setSportFilter] = useState("");
-  const [regionFilter, setRegionFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
+  const [districtFilter, setDistrictFilter] = useState("");
   const [levelFilter, setLevelFilter] = useState("");
 
   useEffect(() => {
@@ -101,11 +100,10 @@ export default function InviteFeed() {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    const region = REGIONS.find(r => r.label === regionFilter);
     getInvites({
       sport: sportFilter || undefined,
-      city: region?.city,
-      district: region?.district,
+      city: cityFilter || undefined,
+      district: districtFilter || undefined,
       level: levelFilter || undefined,
     }).then(list => {
       setInvites(list);
@@ -114,11 +112,15 @@ export default function InviteFeed() {
       setError("讀取邀約列表失敗");
       setLoading(false);
     });
-  }, [user, sportFilter, regionFilter, levelFilter]);
+  }, [user, sportFilter, cityFilter, districtFilter, levelFilter]);
 
   useEffect(() => {
     setLevelFilter(""); // 切換球類時重置程度篩選(避免殘留不合法的分級值)
   }, [sportFilter]);
+
+  useEffect(() => {
+    setDistrictFilter(""); // 切換縣市時重置行政區篩選
+  }, [cityFilter]);
 
   if (user === undefined || (user && loading && invites.length === 0)) {
     return (
@@ -172,16 +174,28 @@ export default function InviteFeed() {
         </div>
 
         <div style={{ display: "flex", gap: 8, minWidth: 0 }}>
-          <select value={regionFilter} onChange={e => setRegionFilter(e.target.value)} style={{
+          <select value={cityFilter} onChange={e => setCityFilter(e.target.value)} style={{
             flex: 1, minWidth: 0, padding: "8px 10px", borderRadius: 8,
             background: "#FFFFFF", border: "1px solid #E2E8F0", color: "#0F172A",
             fontSize: 12, fontFamily: "inherit",
           }}>
-            <option value="">所有地區</option>
-            {REGIONS.map(r => <option key={r.label} value={r.label}>{r.label}</option>)}
+            <option value="">所有縣市</option>
+            {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
 
-          {levelOptions && (
+          <select value={districtFilter} onChange={e => setDistrictFilter(e.target.value)} disabled={!cityFilter} style={{
+            flex: 1, minWidth: 0, padding: "8px 10px", borderRadius: 8,
+            background: cityFilter ? "#FFFFFF" : "#F1F5F9", border: "1px solid #E2E8F0",
+            color: cityFilter ? "#0F172A" : "#94A3B8",
+            fontSize: 12, fontFamily: "inherit",
+          }}>
+            <option value="">所有地區</option>
+            {cityFilter && TAIWAN_DISTRICTS[cityFilter].map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
+        </div>
+
+        {levelOptions && (
+          <div style={{ display: "flex", gap: 8, minWidth: 0 }}>
             <select value={levelFilter} onChange={e => setLevelFilter(e.target.value)} style={{
               flex: 1, minWidth: 0, padding: "8px 10px", borderRadius: 8,
               background: "#FFFFFF", border: "1px solid #E2E8F0", color: "#0F172A",
@@ -190,8 +204,8 @@ export default function InviteFeed() {
               <option value="">所有程度</option>
               {levelOptions.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* List */}
