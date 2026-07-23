@@ -130,7 +130,7 @@ export default function Homepage() {
 
       {/* Player version banner */}
       <div onClick={() => navigate("/player")} style={{
-        margin: "0 28px 28px",
+        margin: "0 28px 14px",
         background: "linear-gradient(135deg, #F1F5F9 0%, #FFFFFF 100%)",
         border: "1px solid #CBD5E1", borderRadius: 14,
         padding: "18px 24px", cursor: "pointer",
@@ -150,6 +150,33 @@ export default function Homepage() {
           <div>
             <div style={{ fontSize: 14, fontWeight: 800, color: "#0F172A", marginBottom: 4 }}>個人</div>
             <div style={{ fontSize: 11, color: "#64748B" }}>紀錄你的每場比賽・段位積分・個人戰績卡</div>
+          </div>
+        </div>
+        <div style={{ fontSize: 18, color: "#94A3B8" }}>→</div>
+      </div>
+
+      {/* Invite feed banner */}
+      <div onClick={() => navigate("/invites")} style={{
+        margin: "0 28px 28px",
+        background: "linear-gradient(135deg, #F1F5F9 0%, #FFFFFF 100%)",
+        border: "1px solid #CBD5E1", borderRadius: 14,
+        padding: "18px 24px", cursor: "pointer",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        transition: "border-color .2s",
+      }}
+        onMouseEnter={e => e.currentTarget.style.borderColor = "#2563EB"}
+        onMouseLeave={e => e.currentTarget.style.borderColor = "#CBD5E1"}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: 12, background: "#2563EB22",
+            border: "1px solid #2563EB44",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 22,
+          }}>🤝</div>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: "#0F172A", marginBottom: 4 }}>揪打</div>
+            <div style={{ fontSize: 11, color: "#64748B" }}>找球伴・發起臨時局或預約局</div>
           </div>
         </div>
         <div style={{ fontSize: 18, color: "#94A3B8" }}>→</div>
