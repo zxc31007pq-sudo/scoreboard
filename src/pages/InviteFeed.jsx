@@ -60,7 +60,10 @@ function InviteCard({ invite, onClick }) {
       </div>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
-        <span style={{ fontSize: 11, color: "#94A3B8" }}>已報名 {invite.participants?.length || 0} 人</span>
+        <div style={{ display: "flex", gap: 10 }}>
+          <span style={{ fontSize: 11, color: "#94A3B8" }}>已報名 {invite.participants?.length || 0} 人</span>
+          <span style={{ fontSize: 11, color: "#94A3B8" }}>💬 {invite.commentCount ?? 0}</span>
+        </div>
         {invite.isFull ? (
           <span style={{
             fontSize: 11, fontWeight: 700, color: "#94A3B8",
