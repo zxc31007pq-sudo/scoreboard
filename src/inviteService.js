@@ -73,6 +73,7 @@ export async function createInvite(data) {
     district: data.district,
     address: data.address,
     locationNote: data.locationNote || "",
+    message: data.message?.trim() || "",
     date: data.date,
     startTime: data.startTime,
     endTime: data.endTime,

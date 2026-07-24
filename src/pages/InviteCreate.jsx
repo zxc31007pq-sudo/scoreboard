@@ -31,6 +31,7 @@ export default function InviteCreate() {
   const [district, setDistrict] = useState(TAIWAN_DISTRICTS[CITIES[0]][0]);
   const [address, setAddress] = useState("");
   const [locationNote, setLocationNote] = useState("");
+  const [message, setMessage] = useState("");
   const [date, setDate] = useState(todayStr());
   const [startTime, setStartTime] = useState("19:00");
   const [endTime, setEndTime] = useState("21:00");
@@ -80,6 +81,7 @@ export default function InviteCreate() {
         sport, type, city, district,
         address: address.trim(),
         locationNote: locationNote.trim(),
+        message: message.trim(),
         date, startTime, endTime,
         levelTag: levelOptions ? (levelTag || null) : null,
         newbieFriendly: showNewbieFriendly && newbieFriendly,
@@ -180,6 +182,14 @@ export default function InviteCreate() {
               placeholder="明確地址，例如：中山北路二段45號" style={{ ...inputStyle, marginBottom: 8 }} />
             <input value={locationNote} onChange={e => setLocationNote(e.target.value)}
               placeholder="地點備註（選填），例如：地下停車場旁側門進入" style={inputStyle} />
+          </div>
+
+          {/* Message to teammates */}
+          <div>
+            <div style={label}>想跟球友說的話</div>
+            <textarea value={message} onChange={e => setMessage(e.target.value)}
+              placeholder="跟大家說說這場約打的期待、風格、想找什麼樣的球友⋯⋯（選填）"
+              rows={3} style={{ ...inputStyle, resize: "none" }} />
           </div>
 
           {/* Date & time */}

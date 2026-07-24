@@ -215,6 +215,9 @@ export default function InviteDetail() {
             {invite.locationNote && (
               <div style={{ fontSize: 12, color: "#64748B" }}>{invite.locationNote}</div>
             )}
+            {invite.message && (
+              <div style={{ fontSize: 13, color: "#0F172A", lineHeight: 1.7 }}>{invite.message}</div>
+            )}
             <div style={{ fontSize: 13, color: "#0F172A" }}>
               🗓 {invite.date} · {invite.startTime}–{invite.endTime}
             </div>
