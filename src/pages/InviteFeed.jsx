@@ -55,6 +55,9 @@ function InviteCard({ invite, onClick }) {
       {invite.locationNote && (
         <div style={{ fontSize: 12, color: "#64748B" }}>{invite.locationNote}</div>
       )}
+      {invite.message && (
+        <div style={{ fontSize: 12, color: "#0F172A", lineHeight: 1.6 }}>{invite.message}</div>
+      )}
       <div style={{ fontSize: 12, color: "#64748B" }}>
         {invite.date} · {invite.startTime}–{invite.endTime}
       </div>
