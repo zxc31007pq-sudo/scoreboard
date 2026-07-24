@@ -5,10 +5,12 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
+  signOut,
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { trackSignup } from "../analyticsService";
+import { isBlacklisted } from "../blacklistService";
 
 async function createUserProfile(user) {
   const ref = doc(db, "users", user.uid);
@@ -25,6 +27,18 @@ async function createUserProfile(user) {
   }
 }
 
+// Google 登入完成後(此時已產生 Firebase Auth session)才能查黑名單，
+// 若在黑名單中，立刻登出踢掉這個 session，不建立/更新個人資料，不放行
+async function rejectIfBlacklisted(user) {
+  if (!user.email) return false;
+  const banned = await isBlacklisted(user.email);
+  if (banned) {
+    await signOut(auth);
+    return true;
+  }
+  return false;
+}
+
 export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -38,6 +52,10 @@ export default function Auth() {
     getRedirectResult(auth)
       .then(async (cred) => {
         if (cred) {
+          if (await rejectIfBlacklisted(cred.user)) {
+            setError("此帳號已被限制使用，如有疑問請聯絡客服");
+            return;
+          }
           await createUserProfile(cred.user);
           navigate(redirectTo);
         }
@@ -53,6 +71,11 @@ export default function Auth() {
     try {
       setLoading(true);
       const cred = await signInWithPopup(auth, provider);
+      if (await rejectIfBlacklisted(cred.user)) {
+        setError("此帳號已被限制使用，如有疑問請聯絡客服");
+        setLoading(false);
+        return;
+      }
       await createUserProfile(cred.user);
       navigate(redirectTo);
     } catch (e) {

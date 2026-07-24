@@ -13,6 +13,10 @@ import PublicProfile from "./pages/PublicProfile";
 import QuickRecord from "./pages/QuickRecord";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
+import InviteFeed from "./pages/InviteFeed";
+import InviteCreate from "./pages/InviteCreate";
+import InviteDetail from "./pages/InviteDetail";
+import AdminPanel from "./pages/AdminPanel";
 
 export default function App() {
   return (
@@ -32,6 +36,10 @@ export default function App() {
         <Route path="/profile/:uid" element={<PublicProfile />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfUse />} />
+        <Route path="/invites" element={<InviteFeed />} />
+        <Route path="/invites/create" element={<InviteCreate />} />
+        <Route path="/invites/:inviteId" element={<InviteDetail />} />
+        <Route path="/admin" element={<AdminPanel />} />
       </Routes>
     </BrowserRouter>
   );
